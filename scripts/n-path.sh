@@ -67,4 +67,4 @@ _npathAppendPath() {
 
 _npathLoad
 
-alias appendPath="_npathAppendPath"
+alias pathAdd="_npathAppendPath"

@@ -23,7 +23,7 @@ _npathLoad() {
         echo "Sourcing path info from $_npathSourceFile"
         export _N_PATH_ORIG="$PATH"
 	
-        paths=$(_nReadEffectiveLines $_npathSourceFile)
+        paths=$(_nReadEffectiveLines "$_npathSourceFile")
 	for path in $paths; do
 		PATH="$path:$PATH"
         done
@@ -38,10 +38,10 @@ _npathAppendPath() {
 		path=$cwd
 	fi
 
-	path=$(_nIndirect $path)
+	path=$(_nIndirect "$path")
 
 	if [[ -f $_npathSourceFile ]]; then
-		exits=`cat $_npathSourceFile | grep -i "^$path$" | wc -l`
+		exits=`cat "$_npathSourceFile" | grep -i "^$path$" | wc -l`
 		if [[ $exits -gt 0 ]]; then
 			echo "$path already exists in PATH"
 			return
@@ -73,7 +73,7 @@ _npathAppendPath() {
                 fi
         fi
 
-	echo $path >> $_npathSourceFile
+	echo "$path" >> "$_npathSourceFile"
 	echo "Reloading PATH ..."
 	_npathLoad
 }

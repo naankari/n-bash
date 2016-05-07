@@ -20,9 +20,9 @@ _nprofileTempInputFile="$N_HOME/.n-profile-temp"
 
 _nprofileFindProfile() {
 	if [[ -f $_nprofileTempInputFile ]]; then
-		profile=$(_nReadEffectiveLine $_nprofileTempInputFile)
-		echo $profile
-		rm $_nprofileTempInputFile
+		profile=$(_nReadEffectiveLine "$_nprofileTempInputFile")
+		echo "$profile"
+		rm "$_nprofileTempInputFile"
 		return
 	fi
 
@@ -34,15 +34,15 @@ _nprofileReset() {
         	origProfile=$_N_PROFILE_ORIG
         	for i in `env | sed 's/=.*//'` ; do
                 	if [[ $i != "PATH" ]]; then
-                        	unset $i
+                        	unset "$i"
                 	fi
         	done
         	for line in $origProfile; do
                 	name=`echo $line | sed 's/=.*//'`
                 	value=`echo $line | sed 's/.*=//'`
-                	export $name=$value
+                	export $name="$value"
         	done
-        	export _N_PROFILE_ORIG=$origProfile
+        	export _N_PROFILE_ORIG="$origProfile"
 	else
         	export _N_PROFILE_ORIG=`env`
 	fi
@@ -63,10 +63,10 @@ _nprofileLoad() {
 	if [[ ! -f $profileFile ]]; then
 		echo "Source file $profileFile does not exists."
 	else
-		source $profileFile
-		eval $profile
+		source "$profileFile"
+		eval "$profile"
 		echo "Profile setup done."
-		export N_PROFILE=$profile
+		export N_PROFILE="$profile"
 	fi
 }
 
@@ -79,17 +79,17 @@ _nprofileReinit() {
 	fi
 
 	if [[ -f $_nprofileTempInputFile ]]; then
-		rm $_nprofileTempInputFile
+		rm "$_nprofileTempInputFile"
 	fi
 
 	profile="${1-$N_PROFILE}"
 
 	if [[ $profile != "" && $profile != "default" ]]; then
-		echo "$profile" > $_nprofileTempInputFile
+		echo "$profile" > "$_nprofileTempInputFile"
 	fi
 	
 	echo "Executing main profile $executableFile ..."	
-	source $executableFile
+	source "$executableFile"
 }
 
 _nprofileiFindMainExecutableFile() {

@@ -34,7 +34,7 @@ _nLoad() {
 	source "$N_LIB/lib.sh"
 
 	if [[ -f $_nMasterSwitchFile ]]; then
-		switchState=$(_nReadEffectiveLine $_nMasterSwitchFile)
+		switchState=$(_nReadEffectiveLine "$_nMasterSwitchFile")
 		switchState=${switchState,,}
 		if [[ $switchState = "off" ]]; then
 			echo "Found switch file $_nMasterSwitchFile with '$switchState' state. Will not setup nBash."
@@ -58,7 +58,7 @@ _nLoadModules() {
 		echo "Copying from default file $_nModulesEnalbedFileDefault ..."
 		cp "$_nModulesEnalbedFileDefault" "$_nModulesEnabledFile"
         fi
-       	modules=$(_nReadEffectiveLines $_nModulesEnabledFile)
+	modules=$(_nReadEffectiveLines "$_nModulesEnabledFile")
        	for module in $modules; do
        		echo "Loading module $module ..."
            	_nSourceIf "$N_MODULES/$module.sh"

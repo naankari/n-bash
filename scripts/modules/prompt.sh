@@ -24,21 +24,21 @@ _npromptFindGitPrompt() {
                 return
         fi
 
-	_nFindFirstFileThatExists $_npromptGitPromptFileOptions	
+	_nFindFirstFileThatExists "$_npromptGitPromptFileOptions"
 }
 
 _npromptLoad() {        
         if [[ -f $_npromptHostnameInputFile ]]; then
-                nhost=$(_nReadEffectiveLine $_npromptHostnameInputFile)
+                nhost=$(_nReadEffectiveLine "$_npromptHostnameInputFile")
         else
                 echo "Could not find hostname file $_npromptHostnameInputFile"
                 nhost=`hostname`
         fi
 
-	gitPromptFile=$(_nFindFirstFileThatExists $_npromptGitPromptFileOptions)
+	gitPromptFile=$(_nFindFirstFileThatExists "$_npromptGitPromptFileOptions")
 	if [[ $gitPromptFile != "" ]]; then
 		echo "Sourcing git prompt file $gitPromptFile ..."
-		source $gitPromptFile
+		source "$gitPromptFile"
 	else
 		echo "Could not file any git prompt file."
 	fi

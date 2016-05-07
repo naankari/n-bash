@@ -4,18 +4,20 @@
 #       N_HOME
 #               Required: False
 #		Default Value: $HOME/.n
-#       N_NO_N_BASH_FILE
+#       N_MASTER_SWITCH_FILE
 #               Required: False
-#               Default Value: $HOME/no-n-bash
+#               Default Value: $HOME/n-bash-on-off
 #	N_MODULES_ENABLED_FILE
 #		Required: False
 #		Default Value: $N_HOME/n-modules-enabled
+
+
 
 if [[ "$N_HOME" = "" ]]; then
 	export N_HOME="$HOME/.n"
 fi
 
-_nNoNBashFile=${N_NO_N_BASH_FILE-"$HOME/no-n-bash"}
+_nMasterSwitchFile=${N_MASTER_SWITCH_FILE-"$HOME/n-bash-on-off"}
 _nModulesEnabledFile=${N_MODULES_ENABLED_FILE-"$N_HOME/n-modules-enabled"}
 
 _nInteractive=$-
@@ -25,8 +27,11 @@ _nLoad() {
         	return
 	fi	
 	
-	if [[ -f $_nNoNBashFile ]]; then
-		echo "Found $_nNoNBashFile file. Will not setup nBash"
+	if [[ -f $_nMasterSwitchFile ]]; then
+		switchState=`cat $_nMasterSwitchFile | grep -iv "^\s*$" | grep -iv "^\s*#.*$"`
+		switchState=${switchState^^}
+		if [[ $switchState = "OFF" ]]; then
+			echo "Found switch file $switchFile to have $switchState state. Will not setup nBash"
 		return
 	fi
 	

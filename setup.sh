@@ -1,3 +1,7 @@
+#!/bin/bash
+
+
+
 branch=${1-master}
 
 nHome="$HOME/.n"
@@ -7,9 +11,19 @@ archiveContainerDirectory="n-bash-$branch/scripts"
 downloadAs="/tmp/n-bash-$branch.zip"
 extractionDir="/tmp/n-bash-$branch-zip"
 
+masterSwitchFile="$HOME/n-bash-on-off"
+
+echo "Setting up nBash ..."
+
 if [[ -d $nHome ]]; then
-	echo "Target directory $nHome already exists. Please remove it yourself."
-	exit 1
+	echo -e "\n\nTarget directory $nHome already exists. Some files will be overwritten."
+	echo "Enter 'y' or 'yes' to continue:"
+	read input
+	input=${input^^}
+	if [[ $input != "Y" && $input != "YES" ]]; then
+		echo "Exiting."
+		exit 1
+	fi
 fi
 
 echo "Downloading archive from $archiveLocation as $downloadAs ..."
@@ -21,14 +35,26 @@ rm -rf "$extractionDir"
 unzip $downloadAs -d "$extractionDir"
 
 echo "Moving contents from $extractionDir/$archiveContainerDirectory to $nHome ..."
-mv "$extractionDir/$archiveContainerDirectory" "$nHome"
-
+mv "$extractionDir/$archiveContainerDirectory/*" "$nHome/"
 echo "Done copying files."
 
-echo "Write folliwng lines to your profile:"
-echo "[Important: Its always better to put this on top.]"
+echo -e "\n\nDo you want to create master switch file to turn on/off nBash?"
+echo "Enter 'y' or 'yes' to okay:"
+read input
+input=${input^^}
+if [[ $input = "Y" || $input = "YES" ]]; then
+	comment=""
+	echo "ON" > $masterSwitchFile
+	echo "Created file $masterSwitchFile. To turn off nBash, write 'off' in the file."
+else
+	echo "Not creaing master switch file."
+fi
+
+echo -e "\n\nWrite following lines to your profile:"
+echo -e "[Important: Its always better to put this on top.]\n\n"
 echo "#################### FROM HERE ####################"
 echo "export N_HOME=\"$nHome\""
 echo "source \"$nHome/n.sh\""
 echo "#################### TILL HERE ####################"
 
+echo -e "\n\nnBash setup completed."

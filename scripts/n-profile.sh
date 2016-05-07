@@ -109,7 +109,7 @@ _nprofileiFindMainExecutableFile() {
 	done
 }
 
-_nprofileReset
+#_nprofileReset
 _nprofileLoad
 
 alias reinit="_nprofileReinit"

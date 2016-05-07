@@ -3,29 +3,42 @@
 
 
 _nSourceIf() {
-        path=$(_nFullPath $1)
+        path=$(_nIndirect "$1")
         [ -f $path ] && source $path || "File $path could not be sourced."
 }
 
-_nFullPath() {
+_nIndirect() {
         path="$1"
 	path=${path/\~/$HOME}
-        echo $path
+	eval path="$path"
+        echo "$path"
 }
 
 _nReadEffectiveLines() {
-	path=$(_nFullPath $1)
+	path=$(_nIndirect "$1")
 	if [[ ! -f $path ]]; then
 		echo ""
 		return
 	fi
-	content=`cat "$path" | sed -e 's/^\s*//;s/\s*$//' | grep -iv "^[ \t]*$" | grep -iv "^[ \t]*#.*$"`
-	echo $content
+	lines=`cat "$path" | sed -e 's/^\s*//;s/\s*$//' | grep -iv "^[ \t]*$" | grep -iv "^[ \t]*#.*$"`
+	for line in $lines; do
+		_nIndirect $line
+	done
 }
 
 _nReadEffectiveLine() {
-	content=$(_nReadEffectiveLines $1)
-	content=`echo $content | head -1`
-	echo $content
+	content=`_nReadEffectiveLines $1`
+	content=`echo "$content" | head -1`
+	echo "$content"
 }
 
+_nFindFirstFileThatExists() {
+	options=$(_nReadEffectiveLines "$1")
+
+	for option in $options; do
+		if [[ -f $option ]]; then
+			echo "$option"
+			return
+		fi
+	done
+}

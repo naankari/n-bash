@@ -8,12 +8,12 @@
 #               Default Value: "$N_HOME/n-hostname"
 #       N_GIT_PROMPT
 #               Required: False
-#               Default Value: "/usr/local/git/contrib/completion/git-prompt.sh"
+#               Default Value: Valid value will be picked from $N_HOME/n-options-git-prompt-file
 
 
 
 _npromptHostnameInputFile=${N_HOSTNAME_INPUT_FILE-"$N_HOME/n-hostname"}
-_npromptGitPrompt=${N_GIT_PROMPT-"/usr/local/git/contrib/completion/git-prompt.sh"}
+_npromptGitPromptFileOptions="$N_HOME/n-options-git-prompt-file"
 
 __git_ps1() {
         echo ""
@@ -27,7 +27,15 @@ _npromptLoad() {
                 nhost=`hostname`
         fi
 
-        _nSourceIf $_npromptGitPrompt
+	echo "$_npromptGitPromptFileOptions"
+
+	gitPromptFile=$(_nFindFirstFileThatExists $_npromptGitPromptFileOptions)
+	if [[ $gitPromptFile != "" ]]; then
+		echo "Sourcing git prompt file $gitPromptFile ..."
+		source $gitPromptFile
+	else
+		echo "Could not file any git prompt file."
+	fi
 
 	profile=${N_PROFILE-none}
 

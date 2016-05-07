@@ -9,14 +9,15 @@
 #	N_PROFILE_EXECUTABLE_FILE_PREFIX
 # 		Required: False
 #		Default Value: "$HOME/.profile-"
-#	N_PROFILE_MAIN_EXECUTABLE_FILE
+#	N_SHELL_PROFILE_FILE
 #		Required: False
-#		Default Value: "$HOME/.profile" or "$HOME/.bashrc"; if exists
+#		Default Value: Valid value will be picked from $N_HOME/n-options-shell-profile-file
 
 
 
 _nprofileExecutableFilePrefix=${N_PROFILE_EXECUTABLE_FILE_PREFIX-"$HOME/.profile-"}
 
+_nprofileShellProfileFileOptions="$N_HOME/n-options-shell-profile-file"
 _nprofileTempInputFile="$N_HOME/.n-profile-temp"
 
 _nprofileFindProfile() {
@@ -94,19 +95,12 @@ _nprofileReinit() {
 }
 
 _nprofileiFindMainExecutableFile() {
-	if [[ "$N_PROFILE_MAIN_EXECUTABLE_FILE" != "" && -f $N_PROFILE_MAIN_EXECUTABLE_FILE ]]; then
-		echo $N_PROFILE_MAIN_EXECUTABLE_FILE
+	if [[ "$N_SHELL_PROFILE_FILE" != "" && -f $N_SHELL_PROFILE_FILE ]]; then
+		echo "$N_SHELL_PROFILE_FILE"
 		return
 	fi
 
-	executableFiles="$HOME/.profile:$HOME/.bashrc"
-	IFS=':' read -ra executableFilesArray <<< "$executableFiles"
-	for executableFile in "${executableFilesArray[@]}"; do
-		if [[ -f $executableFile ]]; then
-			echo $executableFile
-			break
-		fi
-	done
+	_nFindFirstFileThatExists "$_nprofileShellProfileFileOptions"
 }
 
 #_nprofileReset

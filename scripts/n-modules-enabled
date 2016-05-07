@@ -1,5 +1,9 @@
+#This file lists all enabled modules.
+#Comment out a module name if it should not be loaded.
+
 profile
 path
 directory-history
 prompt
 easy
+

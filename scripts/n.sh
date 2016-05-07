@@ -49,13 +49,11 @@ _nLoad() {
 _nLoadModules() {
         if [[ -f $_nModulesEnabledFile ]]; then
                 echo "Loading modules from file $_nModulesEnabledFile ..."
-                while read module; do
-                        if [[ $module = "" ]]; then
-                                continue
-                        fi
+		modules=$(_nReadEffectiveLines $_nModulesEnabledFile)
+                for module in $modules; do
                         echo "Loading module $module ..."
                         _nSourceIf "$N_HOME/n-$module.sh"
-                done < $_nModulesEnabledFile
+                done
                 echo "Finished loading modules."
         else
                 echo "Could not read enabled modules file $_nModulesEnabledFile."

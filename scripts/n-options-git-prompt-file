@@ -1,0 +1,5 @@
+#This file lists all known possible locations of git prompt file.
+
+/usr/local/git/contrib/completion/git-prompt.sh
+/etc/bash_completion.d/git-prompt
+

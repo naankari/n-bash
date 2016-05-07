@@ -25,8 +25,7 @@ _npathLoad() {
         export _N_PATH_ORIG="$PATH"
 	
         paths=$(_nReadEffectiveLines $_npathSourceFile)
-	for line in $paths; do
-		path=$(_nFullPath "$line")
+	for path in $paths; do
 		PATH="$path:$PATH"
         done
         
@@ -45,8 +44,8 @@ _npathAppendPath() {
 		path=$cwd
 	fi
 
-	path=$(_nFullPath $path)	
-	
+	path=$(_nIndirect $path)
+
 	exits=`cat $_npathSourceFile | grep -i "^$path$" | wc -l`
 	if [[ $exits -gt 0 ]]; then
 		echo "$path already exists in PATH"

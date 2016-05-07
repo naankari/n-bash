@@ -29,10 +29,12 @@ if [[ -d $targetDirectory ]]; then
 	fi
 	backupLocation="${targetDirectory}.bak"
 	echo "Creating backup of $targetDirectory at $backupLocation"
-	if [[ ! -d $backupLocation ]]; then
-		mkdir -p $backupLocation
+	if [[ -d $backupLocation ]]; then
+		rm -rf  "$backupLocation"
 	fi
-	cp -r "${targetDirectory}"/* "$backupLocation"
+	mkdir -p "$backupLocation"
+	cp -r "$targetDirectory"/* "$backupLocation"
+	rm -rf "$targetDirectory"
 fi
 
 echo -e "\n\nDownloading archive from $archiveLocation as $downloadAs ..."
@@ -41,10 +43,10 @@ wget -O "$downloadAs" "$archiveLocation"
 
 echo -e "\n\nExtracing archive $downloadAs in $extractionDir ..."
 rm -rf "$extractionDir"
-unzip $downloadAs -d "$extractionDir"
+unzip "$downloadAs" -d "$extractionDir"
 
 echo -e "\n\nMoving contents from $extractionDir/$archiveContainerDirectory to $targetDirectory ..."
-mkdir -p $targetDirectory
+mkdir -p "$targetDirectory"
 mv "$extractionDir/$archiveContainerDirectory"/* "$targetDirectory/"
 echo "Done copying files."
 
@@ -55,7 +57,7 @@ input=${input^^}
 if [[ $input = "N" || $input = "NO" ]]; then
 	echo "Not creaing master switch file."
 else
-	echo "on" > $masterSwitchFile
+	echo "on" > "$masterSwitchFile"
 	echo "Created file $masterSwitchFile. To turn off nBash, write 'off' in the file."
 fi
 
@@ -64,7 +66,7 @@ echo -e "[Important: Its always better to put this on top.]\n\n"
 echo "################ SETTING UP N BASH ################"
 echo "#################### FROM HERE ####################"
 echo "export N_HOME=\"$nHome\""
-echo "source \"$nHome/n.sh\""
+echo "source \"\$N_HOME/scripts/n.sh\""
 echo "#################### TILL HERE ####################"
 
 echo -e "\n\nnBash setup completed."

@@ -4,13 +4,13 @@
 
 _nSourceIf() {
         path=$(_nIndirect "$1")
-        [ -f $path ] && source "$path" || "File $path could not be sourced."
+        [[ -f $path ]] && source "$path" || "File $path could not be sourced."
 }
 
 _nIndirect() {
         path="$1"
 	path=${path/\~/$HOME}
-	eval path="$path"
+	eval "path=\"$path\""
         echo "$path"
 }
 

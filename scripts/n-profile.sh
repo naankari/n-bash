@@ -21,7 +21,8 @@ _nprofileTempInputFile="$N_HOME/.n-profile-temp"
 
 _nprofileFindProfile() {
 	if [[ -f $_nprofileTempInputFile ]]; then
-		echo `cat $_nprofileTempInputFile`
+		profile=$(_nReadEffectiveLine $_nprofileTempInputFile)
+		echo $profile
 		rm $_nprofileTempInputFile
 		return
 	fi

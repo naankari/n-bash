@@ -27,12 +27,15 @@ _nLoad() {
         	return
 	fi	
 	
+	source "$N_HOME/n-lib.sh"
+
 	if [[ -f $_nMasterSwitchFile ]]; then
-		switchState=`cat $_nMasterSwitchFile | grep -iv "^\s*$" | grep -iv "^\s*#.*$"`
-		switchState=${switchState^^}
-		if [[ $switchState = "OFF" ]]; then
-			echo "Found switch file $switchFile to have $switchState state. Will not setup nBash"
-		return
+		switchState=$(_nReadEffectiveLine $_nMasterSwitchFile)
+		switchState=${switchState,,}
+		if [[ $switchState = "off" ]]; then
+			echo "Found switch file $_nMasterSwitchFile with '$switchState' state. Will not setup nBash."
+			return
+		fi
 	fi
 	
 	echo "Setting up nBash ..."	
@@ -44,8 +47,6 @@ _nLoad() {
 }
 
 _nLoadModules() {
-	source "$N_HOME/n-lib.sh"
-
         if [[ -f $_nModulesEnabledFile ]]; then
                 echo "Loading modules from file $_nModulesEnabledFile ..."
                 while read module; do

@@ -23,14 +23,14 @@ _npathLoad() {
 
         echo "Sourcing path info from $_npathSourceFile"
         export _N_PATH_ORIG="$PATH"
-        while read line; do
-		if [[ $line = "" ]]; then
-			continue
-		fi
+	
+        paths=$(_nReadEffectiveLines $_npathSourceFile)
+	for line in $paths; do
 		path=$(_nFullPath "$line")
 		PATH="$path:$PATH"
-        done < "$_npathSourceFile"
-        export PATH
+        done
+        
+	export PATH
 }
 
 _npathAppendPath() {

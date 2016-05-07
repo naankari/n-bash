@@ -21,7 +21,7 @@ __git_ps1() {
 
 _npromptLoad() {        
         if [[ -f $_npromptHostnameInputFile ]]; then
-                nhost=`cat $_npromptHostnameInputFile`
+                nhost=$(_nReadEffectiveLine $_npromptHostnameInputFile)
         else
                 echo "Could not find hostname file $_npromptHostnameInputFile"
                 nhost=`hostname`

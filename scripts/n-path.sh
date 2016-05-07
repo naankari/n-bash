@@ -54,11 +54,12 @@ _npathAppendPath() {
 	fi
 
 	echo "Adding $path in PATH ..."
-	echo "Enter 'y' or 'Y' to confirm:"
+	echo "Enter 'y' or 'yes' to confirm:"
 	
 	read input
+	input=${input^^}
 	
-	if [[ $input = "y" || $input = "Y" ]]; then
+	if [[ $input = "Y" || $input = "YES" ]]; then
 		echo $path >> $_npathSourceFile
 		echo "Reloading PATH ..."
 		_npathLoad

@@ -32,19 +32,19 @@ _nprofileFindProfile() {
 _nprofileReset() {
 	if [[ "$_N_PROFILE_ORIG" != "" ]]; then
         	origProfile=$_N_PROFILE_ORIG
-        	for i in `env | sed 's/=.*//'` ; do
+        	for i in $(env | sed 's/=.*//') ; do
                 	if [[ $i != "PATH" ]]; then
                         	unset "$i"
                 	fi
         	done
         	for line in $origProfile; do
-                	name=`echo $line | sed 's/=.*//'`
-                	value=`echo $line | sed 's/.*=//'`
+                	name=$(echo $line | sed 's/=.*//')
+                	value=$(echo $line | sed 's/.*=//')
                 	export $name="$value"
         	done
         	export _N_PROFILE_ORIG="$origProfile"
 	else
-        	export _N_PROFILE_ORIG=`env`
+        	export _N_PROFILE_ORIG=$(env)
 	fi
 }
 

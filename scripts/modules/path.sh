@@ -33,7 +33,7 @@ _npathLoad() {
 
 _npathAppendPath() {
 	path="$1"
-	cwd=`pwd`
+	cwd=$(pwd)
 	if [[ $path = "" || $path = "." ]]; then
 		path=$cwd
 	fi
@@ -41,7 +41,7 @@ _npathAppendPath() {
 	path=$(_nIndirect "$path")
 
 	if [[ -f $_npathSourceFile ]]; then
-		exits=`cat "$_npathSourceFile" | grep -i "^$path$" | wc -l`
+		exits=$(cat "$_npathSourceFile" | grep -i "^$path$" | wc -l)
 		if [[ $exits -gt 0 ]]; then
 			echo "$path already exists in PATH"
 			return

@@ -32,7 +32,7 @@ _npromptLoad() {
                 nhost=$(_nReadEffectiveLine "$_npromptHostnameInputFile")
         else
                 echo "Could not find hostname file $_npromptHostnameInputFile"
-                nhost=`hostname`
+                nhost=$(hostname)
         fi
 
 	gitPromptFile=$(_nFindFirstFileThatExists "$_npromptGitPromptFileOptions")

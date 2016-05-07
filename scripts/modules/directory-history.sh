@@ -16,14 +16,14 @@ _ndhUpdateHistory() {
     if [[ $_ndhPreviousWorkingDirectory != "" &&  $PWD != $_ndhPreviousWorkingDirectory ]]; then
         currentCount=${#_ndhHistory[@]}
 	if [[ $currentCount -gt $_ndhSize ]]; then
-		for index in `seq $_ndhSize $currentCount`; do
+		for index in $(seq $_ndhSize $currentCount); do
                 unset _ndhHistory[$index-1] #Funny. Unset can not have space in the index calculation.
             done
         fi
         
 	nextValue=$_ndhPreviousWorkingDirectory
           
-        for index in `seq 1 $_ndhSize`
+        for index in $(seq 1 $_ndhSize)
         do
             oldValue="${_ndhHistory[$index - 1]}"
             
@@ -48,7 +48,7 @@ _ndhPrintHistory() {
     
     echo "Available history:"
     
-    for index in `seq 1 $count`; do
+    for index in $(seq 1 $count); do
         dirName="${_ndhHistory[$index - 1]}"
         if [[ $PWD == $dirName ]]; then
             isCurrent="(*)"
@@ -92,7 +92,7 @@ _ndhGoToIndex() {
         return 2
     fi
 
-    if [[ `expr $index - 1` -lt 0 ]]; then
+    if [[ $(expr $index - 1) -lt 0 ]]; then
         echo "[ERROR] Invalid input"
         return 3
     fi

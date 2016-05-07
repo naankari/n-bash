@@ -20,15 +20,15 @@ _nReadEffectiveLines() {
 		echo ""
 		return
 	fi
-	lines=`cat "$path" | sed -e 's/^\s*//;s/\s*$//' | grep -iv "^[ \t]*$" | grep -iv "^[ \t]*#.*$"`
+	lines=$(cat "$path" | sed -e 's/^\s*//;s/\s*$//' | grep -iv "^[ \t]*$" | grep -iv "^[ \t]*#.*$")
 	for line in $lines; do
 		_nIndirect "$line"
 	done
 }
 
 _nReadEffectiveLine() {
-	content=`_nReadEffectiveLines "$1"`
-	content=`echo "$content" | head -1`
+	content=$(_nReadEffectiveLines "$1")
+	content=$(echo "$content" | head -1)
 	echo "$content"
 }
 

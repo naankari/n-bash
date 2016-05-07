@@ -4,7 +4,7 @@
 
 branch=${1-master}
 
-nHome="$HOME/.n"
+nHome="$HOME/.m n"
 masterSwitchFile="$HOME/n-bash-on-off"
 
 archiveLocation="https://github.com/naankari/n-bash/archive/$branch.zip"

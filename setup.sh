@@ -41,23 +41,24 @@ rm -rf "$extractionDir"
 unzip $downloadAs -d "$extractionDir"
 
 echo -e "\n\nMoving contents from $extractionDir/$archiveContainerDirectory to $nHome ..."
+mkdir -p $nHome
 mv "$extractionDir/$archiveContainerDirectory"/* "$nHome/"
 echo "Done copying files."
 
-echo -e "\n\nDo you want to create master switch file to turn on/off nBash?"
-echo "Enter 'y' or 'yes' to okay:"
+echo -e "\n\nCreating master switch file to turn on/off nBash?"
+echo "Enter 'n' or 'no' to skip:"
 read input
 input=${input^^}
-if [[ $input = "Y" || $input = "YES" ]]; then
-	comment=""
-	echo "ON" > $masterSwitchFile
-	echo "Created file $masterSwitchFile. To turn off nBash, write 'off' in the file."
-else
+if [[ $input = "N" || $input = "NO" ]]; then
 	echo "Not creaing master switch file."
+else
+	echo "on" > $masterSwitchFile
+	echo "Created file $masterSwitchFile. To turn off nBash, write 'off' in the file."
 fi
 
 echo -e "\n\nWrite following lines to your profile:"
 echo -e "[Important: Its always better to put this on top.]\n\n"
+echo "################ SETTING UP N BASH ################"
 echo "#################### FROM HERE ####################"
 echo "export N_HOME=\"$nHome\""
 echo "source \"$nHome/n.sh\""

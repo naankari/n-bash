@@ -29,19 +29,19 @@ if [[ -d $nHome ]]; then
 	if [[ ! -d $backupLocation ]]; then
 		mkdir -p $backupLocation
 	fi
-	mv $nHome/* $backupLocation/
+	cp -r "${nHome}"/* "$backupLocation"
 fi
 
-echo "Downloading archive from $archiveLocation as $downloadAs ..."
+echo -e "\n\nDownloading archive from $archiveLocation as $downloadAs ..."
 rm -rf "$downloadAs"
 wget -O "$downloadAs" "$archiveLocation"
 
-echo "Extracing archive $downloadAs in $extractionDir ..."
+echo -e "\n\nExtracing archive $downloadAs in $extractionDir ..."
 rm -rf "$extractionDir"
 unzip $downloadAs -d "$extractionDir"
 
-echo "Moving contents from $extractionDir/$archiveContainerDirectory to $nHome ..."
-mv "$extractionDir/$archiveContainerDirectory/*" "$nHome/"
+echo -e "\n\nMoving contents from $extractionDir/$archiveContainerDirectory to $nHome ..."
+mv "$extractionDir/$archiveContainerDirectory"/* "$nHome/"
 echo "Done copying files."
 
 echo -e "\n\nDo you want to create master switch file to turn on/off nBash?"

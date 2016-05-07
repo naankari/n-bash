@@ -4,7 +4,7 @@
 
 branch=${1-master}
 
-nHome="$HOME/.m n"
+nHome="$HOME/.n"
 masterSwitchFile="$HOME/n-bash-on-off"
 
 archiveLocation="https://github.com/naankari/n-bash/archive/$branch.zip"
@@ -55,10 +55,11 @@ echo "Enter 'n' or 'no' to skip:"
 read input
 input=${input^^}
 if [[ $input = "N" || $input = "NO" ]]; then
-	echo "Not creaing master switch file."
+	echo "Skipping creating master switch file."
+	echo "However you can later create the file $masterSwitchFile with content 'off'. This will turn off nBash."
 else
 	echo "on" > "$masterSwitchFile"
-	echo "Created file $masterSwitchFile. To turn off nBash, write 'off' in the file."
+	echo "Created mster switch file $masterSwitchFile. To turn off nBash, set the content of the file to 'off'."
 fi
 
 echo -e "\n\nWrite following lines to your profile:"

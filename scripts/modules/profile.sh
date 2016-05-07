@@ -6,18 +6,16 @@
 #	N_PROFILE
 #		Required: False
 #		Default Value: "none"
-#	N_PROFILE_EXECUTABLE_FILE_PREFIX
-# 		Required: False
-#		Default Value: "$HOME/.profile-"
 #	N_SHELL_PROFILE_FILE
 #		Required: False
-#		Default Value: Valid value will be picked from $N_HOME/n-options-shell-profile-file
+#		Default Value: Valid value will be picked from $N_OPTIONS/shell-profile-files
+#	N_OPTIONS
+#		Required: True
 
 
 
-_nprofileExecutableFilePrefix=${N_PROFILE_EXECUTABLE_FILE_PREFIX-"$HOME/.profile-"}
-
-_nprofileShellProfileFileOptions="$N_HOME/n-options-shell-profile-file"
+_nprofileExecutableFilePrefix="$N_HOME/profile-"
+_nprofileShellProfileFileOptions="$N_OPTIONS/shell-profile-files"
 _nprofileTempInputFile="$N_HOME/.n-profile-temp"
 
 _nprofileFindProfile() {

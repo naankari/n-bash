@@ -7,18 +7,22 @@
 #       N_MASTER_SWITCH_FILE
 #               Required: False
 #               Default Value: $HOME/n-bash-on-off
-#	N_MODULES_ENABLED_FILE
-#		Required: False
-#		Default Value: $N_HOME/n-modules-enabled
 
 
 
 if [[ "$N_HOME" = "" ]]; then
 	export N_HOME="$HOME/.n"
 fi
+export N_LIB="$N_HOME/scripts/lib"
+export N_MODULES="$N_HOME/scripts/modules"
+export N_OPTIONS="$N_HOME/scripts/options"
+export N_TEMPLATES="$N_HOME/scripts/templates"
+export N_DEFAULTS="$N_HOME/scripts/defaults"
 
 _nMasterSwitchFile=${N_MASTER_SWITCH_FILE-"$HOME/n-bash-on-off"}
-_nModulesEnabledFile=${N_MODULES_ENABLED_FILE-"$N_HOME/n-modules-enabled"}
+
+_nModulesEnabledFile="$N_HOME/modules-enabled"
+_nModulesEnalbedFileDefault="$N_DEFAULTS/modules-enabled"
 
 _nInteractive=$-
 _nLoad() {
@@ -27,7 +31,7 @@ _nLoad() {
         	return
 	fi	
 	
-	source "$N_HOME/n-lib.sh"
+	source "$N_LIB/lib.sh"
 
 	if [[ -f $_nMasterSwitchFile ]]; then
 		switchState=$(_nReadEffectiveLine $_nMasterSwitchFile)
@@ -49,15 +53,17 @@ _nLoad() {
 _nLoadModules() {
         if [[ -f $_nModulesEnabledFile ]]; then
                 echo "Loading modules from file $_nModulesEnabledFile ..."
-		modules=$(_nReadEffectiveLines $_nModulesEnabledFile)
-                for module in $modules; do
-                        echo "Loading module $module ..."
-                        _nSourceIf "$N_HOME/n-$module.sh"
-                done
-                echo "Finished loading modules."
         else
                 echo "Could not read enabled modules file $_nModulesEnabledFile."
+		echo "Copying from default file $_nModulesEnalbedFileDefault ..."
+		cp $_nModulesEnalbedFileDefault $_nModulesEnabledFile
         fi
+       	modules=$(_nReadEffectiveLines $_nModulesEnabledFile)
+       	for module in $modules; do
+       		echo "Loading module $module ..."
+           	_nSourceIf "$N_MODULES/$module.sh"
+   	done
+  	echo "Finished loading modules."
 }
 
 _nLoad

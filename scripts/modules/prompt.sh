@@ -3,20 +3,28 @@
 # Environment
 #       N_HOME
 #               Required: True
-#       N_HOSTNAME_INPUT_FILE
+#       N_GIT_PROMPT_FILE
 #               Required: False
-#               Default Value: "$N_HOME/n-hostname"
-#       N_GIT_PROMPT
-#               Required: False
-#               Default Value: Valid value will be picked from $N_HOME/n-options-git-prompt-file
+#               Default Value: Valid value will be picked from $N_OPTIONS/git-prompt-files
+#       N_OPTIONS
+#               Required: True
 
 
 
-_npromptHostnameInputFile=${N_HOSTNAME_INPUT_FILE-"$N_HOME/n-hostname"}
-_npromptGitPromptFileOptions="$N_HOME/n-options-git-prompt-file"
+_npromptHostnameInputFile="$N_HOME/hostname"
+_npromptGitPromptFileOptions="$N_OPTIONS/git-prompt-files"
 
 __git_ps1() {
         echo ""
+}
+
+_npromptFindGitPrompt() {
+	if [[ "$N_GIT_PROMPT_FILE" != "" && -f $N_GIT_PROMPT_FILE ]]; then
+                echo "$N_GIT_PROMPT_FILE"
+                return
+        fi
+
+	_nFindFirstFileThatExists $_npromptGitPromptFileOptions	
 }
 
 _npromptLoad() {        
@@ -26,8 +34,6 @@ _npromptLoad() {
                 echo "Could not find hostname file $_npromptHostnameInputFile"
                 nhost=`hostname`
         fi
-
-	echo "$_npromptGitPromptFileOptions"
 
 	gitPromptFile=$(_nFindFirstFileThatExists $_npromptGitPromptFileOptions)
 	if [[ $gitPromptFile != "" ]]; then

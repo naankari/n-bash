@@ -5,18 +5,21 @@
 branch=${1-master}
 
 nHome="$HOME/.n"
+masterSwitchFile="$HOME/n-bash-on-off"
+
 archiveLocation="https://github.com/naankari/n-bash/archive/$branch.zip"
-archiveContainerDirectory="n-bash-$branch/scripts"
 
 downloadAs="/tmp/n-bash-$branch.zip"
 extractionDir="/tmp/n-bash-$branch-zip"
 
-masterSwitchFile="$HOME/n-bash-on-off"
+targetDirectory="$nHome/scripts"
+archiveContainerDirectory="n-bash-$branch/scripts"
 
 echo "Setting up nBash ..."
 
-if [[ -d $nHome ]]; then
-	echo -e "\n\nTarget directory $nHome already exists. Some files will be overwritten."
+targetDirectory="$nHome/scripts"
+if [[ -d $targetDirectory ]]; then
+	echo -e "\n\nTarget directory $targetDirectory already exists. It will be backed up and deleted."
 	echo "Enter 'y' or 'yes' to continue:"
 	read input
 	input=${input^^}
@@ -24,12 +27,12 @@ if [[ -d $nHome ]]; then
 		echo "Exiting."
 		exit 1
 	fi
-	backupLocation="${nHome}.bak"
-	echo "Creating backup of $nHome at $backupLocation"
+	backupLocation="${targetDirectory}.bak"
+	echo "Creating backup of $targetDirectory at $backupLocation"
 	if [[ ! -d $backupLocation ]]; then
 		mkdir -p $backupLocation
 	fi
-	cp -r "${nHome}"/* "$backupLocation"
+	cp -r "${targetDirectory}"/* "$backupLocation"
 fi
 
 echo -e "\n\nDownloading archive from $archiveLocation as $downloadAs ..."
@@ -40,9 +43,9 @@ echo -e "\n\nExtracing archive $downloadAs in $extractionDir ..."
 rm -rf "$extractionDir"
 unzip $downloadAs -d "$extractionDir"
 
-echo -e "\n\nMoving contents from $extractionDir/$archiveContainerDirectory to $nHome ..."
-mkdir -p $nHome
-mv "$extractionDir/$archiveContainerDirectory"/* "$nHome/"
+echo -e "\n\nMoving contents from $extractionDir/$archiveContainerDirectory to $targetDirectory ..."
+mkdir -p $targetDirectory
+mv "$extractionDir/$archiveContainerDirectory"/* "$targetDirectory/"
 echo "Done copying files."
 
 echo -e "\n\nCreating master switch file to turn on/off nBash?"

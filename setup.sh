@@ -24,6 +24,12 @@ if [[ -d $nHome ]]; then
 		echo "Exiting."
 		exit 1
 	fi
+	backupLocation="${nHome}.bak"
+	echo "Creating backup of $nHome at $backupLocation"
+	if [[ ! -d $backupLocation ]]; then
+		mkdir -p $backupLocation
+	fi
+	mv $nHome/* $backupLocation/
 fi
 
 echo "Downloading archive from $archiveLocation as $downloadAs ..."

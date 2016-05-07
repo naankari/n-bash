@@ -65,7 +65,7 @@ _npathAppendPath() {
                 read input
                 input=${input^^}
                 if [[ $input = "Y" || $input = "YES" ]]; then
-                        cp $_npathSourceFileTemplate $_npathSourceFile
+                        cp "$_npathSourceFileTemplate" "$_npathSourceFile"
                         echo "Created file $_npathSourceFile to source path information."
                 else
                         echo "Exiting."

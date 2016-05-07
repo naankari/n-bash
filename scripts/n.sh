@@ -56,7 +56,7 @@ _nLoadModules() {
         else
                 echo "Could not read enabled modules file $_nModulesEnabledFile."
 		echo "Copying from default file $_nModulesEnalbedFileDefault ..."
-		cp $_nModulesEnalbedFileDefault $_nModulesEnabledFile
+		cp "$_nModulesEnalbedFileDefault" "$_nModulesEnabledFile"
         fi
        	modules=$(_nReadEffectiveLines $_nModulesEnabledFile)
        	for module in $modules; do

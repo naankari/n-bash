@@ -31,16 +31,16 @@ _npromptLoad() {
         if [[ -f $_npromptHostnameInputFile ]]; then
                 nhost=$(_nReadEffectiveLine "$_npromptHostnameInputFile")
         else
-                echo "Could not find hostname file $_npromptHostnameInputFile"
+                _nWarn "Could not find hostname file $_npromptHostnameInputFile"
                 nhost=$(hostname)
         fi
 
 	gitPromptFile=$(_nFindFirstFileThatExists "$_npromptGitPromptFileOptions")
 	if [[ $gitPromptFile != "" ]]; then
-		echo "Sourcing git prompt file $gitPromptFile ..."
+		_nLog "Sourcing git prompt file $gitPromptFile ..."
 		source "$gitPromptFile"
 	else
-		echo "Could not file any git prompt file."
+		_nWarn "Could not file any git prompt file."
 	fi
 
 	profile=${N_PROFILE-none}

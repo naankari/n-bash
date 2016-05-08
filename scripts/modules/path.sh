@@ -16,11 +16,11 @@ _npathLoad() {
 	fi
 
 	if [[ ! -f $_npathSourceFile ]]; then
-		echo "Did not find $_npathSourceFile to source path information"
+		_nWarn "Did not find $_npathSourceFile to source path information"
 		return
 	fi
 
-        echo "Sourcing path info from $_npathSourceFile"
+        _nLog "Sourcing path info from $_npathSourceFile"
         export _N_PATH_ORIG="$PATH"
 	
         paths=$(_nReadEffectiveLines "$_npathSourceFile")
@@ -52,19 +52,19 @@ _npathAppendPath() {
 	echo "Enter 'y' or 'yes' to confirm:"
 	
 	read input
-	input=${input^^}
+	input=$(_nToLower "$input")
 	
-	if [[ $input != "Y" && $input != "YES" ]]; then
+	if [[ $input != "y" && $input != "yes" ]]; then
 		echo "Exiting."
 		return 1
 	fi
 
 	if [[ ! -f $_npathSourceFile ]]; then
-                echo "Did not find file $_npathSourceFile to source path information"
-                echo "Enter y to "Y" to create one and continue:"
+                echo "Did not find file $_npathSourceFile to source path information."
+                echo "Enter 'y' or 'yes' to create one and continue:"
                 read input
-                input=${input^^}
-                if [[ $input = "Y" || $input = "YES" ]]; then
+                input=$(_nToLower "$input")
+                if [[ $input = "y" || $input = "yes" ]]; then
                         cp "$_npathSourceFileTemplate" "$_npathSourceFile"
                         echo "Created file $_npathSourceFile to source path information."
                 else
@@ -75,7 +75,7 @@ _npathAppendPath() {
 
 	echo "$path" >> "$_npathSourceFile"
 	echo "Reloading PATH ..."
-	_npathLoad
+	$(_npathLoad)
 }
 
 _npathLoad

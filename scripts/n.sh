@@ -26,45 +26,57 @@ _nModulesEnalbedFileDefault="$N_DEFAULTS/modules-enabled"
 
 _nInteractive=$-
 _nLoad() {
-	if [[ $_nInteractive != *i* ]]; then
+    if [[ $_nInteractive != *i* ]]; then
         	# Shell is non-interactive. Stop.
         	return
-	fi	
-	
-	source "$N_LIB/lib.sh"
+	fi
+
+    source "$N_LIB/lib.sh"
+
+    logLevel=$(_nToLower "$N_LOG_LEVEL")
+    if [[ $logLevel != "verbose" && $logLevel != "warn" && $logLevel != "error" ]]; then
+        export N_LOG_LEVEL="verbose"
+    fi
 
 	if [[ -f $_nMasterSwitchFile ]]; then
 		switchState=$(_nReadEffectiveLine "$_nMasterSwitchFile")
-		switchState=${switchState,,}
+		switchState=$(_nToLower "$switchState")
 		if [[ $switchState = "off" ]]; then
-			echo "Found switch file $_nMasterSwitchFile with '$switchState' state. Will not setup nBash."
+			_nLog "Found switch file $_nMasterSwitchFile with '$switchState' state. Will not setup nBash."
 			return
 		fi
 	fi
 	
-	echo "Setting up nBash ..."	
-	echo "Using $N_HOME as nBash Home."
+	_nLog "Setting up nBash ..."	
+	_nLog "Using $N_HOME as nBash Home."
 
 	_nLoadModules
 
-	echo "Finished setting up nBash."
+	_nLog "Finished setting up nBash."
+
+    _nLog "Running diagnostics ..."
+    _nDiagnostics
+    _nLog "Diagnostics completed."
 }
 
 _nLoadModules() {
         if [[ -f $_nModulesEnabledFile ]]; then
-                echo "Loading modules from file $_nModulesEnabledFile ..."
+                _nLog "Loading modules from file $_nModulesEnabledFile ..."
         else
-                echo "Could not read enabled modules file $_nModulesEnabledFile."
-		echo "Copying from default file $_nModulesEnalbedFileDefault ..."
-		cp "$_nModulesEnalbedFileDefault" "$_nModulesEnabledFile"
+                _nWarn "Could not read enabled modules file $_nModulesEnabledFile."
+                _nWarn "Copying from default file $_nModulesEnalbedFileDefault ..."
+                cp "$_nModulesEnalbedFileDefault" "$_nModulesEnabledFile"
         fi
-	modules=$(_nReadEffectiveLines "$_nModulesEnabledFile")
+        modules=$(_nReadEffectiveLines "$_nModulesEnabledFile")
        	for module in $modules; do
-       		echo "Loading module $module ..."
+       		_nLog "Loading module $module ..."
            	_nSourceIf "$N_MODULES/$module.sh"
    	done
-  	echo "Finished loading modules."
+  	_nLog "Finished loading modules."
+}
+
+_nDiagnostics() {
+    _nLibDiagnostics
 }
 
 _nLoad
-

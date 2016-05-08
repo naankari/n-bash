@@ -115,7 +115,7 @@ _ndhCleanHistory() {
 
 _ndhPrintUsage() {
     echo "Usage:"
-    echo "$_ndhProgramName"
+    echo "${_ndhProgramName-Program}"
     echo "          Show the history and prompt for the input"
     echo "[Optional]"
     echo "    -c"
@@ -161,8 +161,11 @@ _ndh() {
     return 1
 }
 
-export PROMPT_COMMAND=_ndhUpdateHistory
+_ndhLoad() {
+    export PROMPT_COMMAND=_ndhUpdateHistory
+}
+
+_ndhLoad
 
 _ndhProgramName="dh"
 alias dh="_ndh"
-

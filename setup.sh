@@ -22,8 +22,7 @@ if [[ -d $targetDirectory ]]; then
 	echo -e "\n\nTarget directory $targetDirectory already exists. It will be backed up and deleted."
 	echo "Enter 'y' or 'yes' to continue:"
 	read input
-	input=${input^^}
-	if [[ $input != "Y" && $input != "YES" ]]; then
+	if [[ $input != "y" && $input != "yes" ]]; then
 		echo "Exiting."
 		exit 1
 	fi
@@ -53,8 +52,7 @@ echo "Done copying files."
 echo -e "\n\nCreating master switch file to turn on/off nBash?"
 echo "Enter 'n' or 'no' to skip:"
 read input
-input=${input^^}
-if [[ $input = "N" || $input = "NO" ]]; then
+if [[ $input = "n" || $input = "no" ]]; then
 	echo "Skipping creating master switch file."
 	echo "However you can later create the file $masterSwitchFile with content 'off'. This will turn off nBash."
 else

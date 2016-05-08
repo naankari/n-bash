@@ -6,6 +6,9 @@
 #	N_PROFILE
 #		Required: False
 #		Default Value: "none"
+#   N_PROFILE_EXECUTABLE_FILE_PREFIX
+#       Required: False
+#       Default Value: "$N_HOME/profile-"
 #	N_SHELL_PROFILE_FILE
 #		Required: False
 #		Default Value: Valid value will be picked from $N_OPTIONS/shell-profile-files
@@ -14,7 +17,7 @@
 
 
 
-_nprofileExecutableFilePrefix="$N_HOME/profile-"
+_nprofileExecutableFilePrefix=${N_PROFILE_EXECUTABLE_FILE_PREFIX-"$N_HOME/profile-"}
 _nprofileShellProfileFileOptions="$N_OPTIONS/shell-profile-files"
 _nprofileTempInputFile="$N_HOME/.n-profile-temp"
 
@@ -54,28 +57,28 @@ _nprofileLoad() {
 	export N_PROFILE="none"
 	
 	if [[ $profile = "" || $profile = "none" ]]; then
-		echo "Not setting up any profile."
+		_nLog "Not setting up any profile."
 		return
 	fi
 	
-	echo "Setting up profile for $profile ..."
+	_nLog "Setting up profile for $profile ..."
 	profileFile="${_nprofileExecutableFilePrefix}${profile}"
 	if [[ ! -f $profileFile ]]; then
-		echo "Source file $profileFile does not exists."
+		_nError "Source file $profileFile does not exists."
 	else
-		source "$profileFile"
-		eval "$profile"
-		echo "Profile setup done."
+		output=$(source "$profileFile")
+        _nLog "$output"
+		_nLog "Profile setup done."
 		export N_PROFILE="$profile"
 	fi
 }
 
 _nprofileReinit() {
-	executableFile=$(_nprofileiFindMainExecutableFile)
+	shellProfileFile=$(_nprofileiFindShellProfileFile)
 	
-	if [[ $executableFile = "" ]]; then
-		echo "Please setup N_PROFILE_MAIN_EXECUTABLE_FILE environment variable to correct file path. eg: '\$HOME/.profile' or '\$HOME/.bashrc' or whatever."
-                return 1
+	if [[ $shellProfileFile = "" ]]; then
+		echo "Please setup N_SHELL_PROFILE_FILE environment variable as the location of your shell profile file. eg: '\$HOME/.profile' or '\$HOME/.bashrc' or whatever."
+        return 1
 	fi
 
 	if [[ -f $_nprofileTempInputFile ]]; then
@@ -92,7 +95,7 @@ _nprofileReinit() {
 	source "$executableFile"
 }
 
-_nprofileiFindMainExecutableFile() {
+_nprofileiFindShellProfileFile() {
 	if [[ "$N_SHELL_PROFILE_FILE" != "" && -f $N_SHELL_PROFILE_FILE ]]; then
 		echo "$N_SHELL_PROFILE_FILE"
 		return

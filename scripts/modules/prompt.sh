@@ -37,7 +37,7 @@ _npromptLoad() {
 
     gitPromptFile=$(_nFindFirstFileThatExists "$_npromptGitPromptFileOptions")
     if [[ $gitPromptFile != "" ]]; then
-        _nLog "Sourcing git prompt file $gitPromptFile ..."
+        _nLog "Sourcing git prompt file $gitPromptFile"
         source "$gitPromptFile"
     else
         _nWarn "Could not file any git prompt file."

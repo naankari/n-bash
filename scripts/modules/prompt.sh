@@ -45,8 +45,10 @@ _npromptLoad() {
 
     profile=${N_PROFILE-none}
     PS1="\`if [[ \$? = 0 ]]; then echo '\[\033[1;32m\][^_^]'; else echo '\[\033[1;31m\][O_O]'; fi\`\
- \[\033[1;34m\](\$profile)\
- \[\033[1;34m\]\u@\$nhost\
+ \[\033[34m\][\$profile]\
+ \[\033[34m\]\u\
+\[\033[0m\]@\
+\[\033[34m\]\$nhost\
  \[\033[0m\]\D{%a %Y-%m-%d}::\t\
  \[\033[34m\][\w]\
 \[\033[0m\]\$(__git_ps1)\
@@ -56,3 +58,4 @@ _npromptLoad() {
 }
 
 _npromptLoad
+

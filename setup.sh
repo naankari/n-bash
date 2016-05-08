@@ -19,21 +19,21 @@ echo "Setting up nBash ..."
 
 targetDirectory="$nHome/scripts"
 if [[ -d $targetDirectory ]]; then
-	echo -e "\n\nTarget directory $targetDirectory already exists. It will be backed up and deleted."
-	echo "Enter 'y' or 'yes' to continue:"
-	read input
-	if [[ $input != "y" && $input != "yes" ]]; then
-		echo "Exiting."
-		exit 1
-	fi
-	backupLocation="${targetDirectory}.bak"
-	echo "Creating backup of $targetDirectory at $backupLocation"
-	if [[ -d $backupLocation ]]; then
-		rm -rf  "$backupLocation"
-	fi
-	mkdir -p "$backupLocation"
-	cp -r "$targetDirectory"/* "$backupLocation"
-	rm -rf "$targetDirectory"
+    echo -e "\n\nTarget directory $targetDirectory already exists. It will be backed up and deleted."
+    echo "Enter 'y' or 'yes' to continue:"
+    read input
+    if [[ $input != "y" && $input != "yes" ]]; then
+        echo "Exiting."
+        exit 1
+    fi
+    backupLocation="${targetDirectory}.bak"
+    echo "Creating backup of $targetDirectory at $backupLocation"
+    if [[ -d $backupLocation ]]; then
+        rm -rf  "$backupLocation"
+    fi
+    mkdir -p "$backupLocation"
+    cp -r "$targetDirectory"/* "$backupLocation"
+    rm -rf "$targetDirectory"
 fi
 
 echo -e "\n\nDownloading archive from $archiveLocation as $downloadAs ..."
@@ -53,11 +53,11 @@ echo -e "\n\nCreating master switch file to turn on/off nBash?"
 echo "Enter 'n' or 'no' to skip:"
 read input
 if [[ $input = "n" || $input = "no" ]]; then
-	echo "Skipping creating master switch file."
-	echo "However you can later create the file $masterSwitchFile with content 'off'. This will turn off nBash."
+    echo "Skipping creating master switch file."
+    echo "However you can later create the file $masterSwitchFile with content 'off'. This will turn off nBash."
 else
-	echo "on" > "$masterSwitchFile"
-	echo "Created mster switch file $masterSwitchFile. To turn off nBash, set the content of the file to 'off'."
+    echo "on" > "$masterSwitchFile"
+    echo "Created mster switch file $masterSwitchFile. To turn off nBash, set the content of the file to 'off'."
 fi
 
 echo -e "\n\nWrite following lines to your profile:"

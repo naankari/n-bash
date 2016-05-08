@@ -15,18 +15,17 @@ _ndhPreviousWorkingDirectory=""
 _ndhUpdateHistory() {
     if [[ $_ndhPreviousWorkingDirectory != "" &&  $PWD != $_ndhPreviousWorkingDirectory ]]; then
         currentCount=${#_ndhHistory[@]}
-	if [[ $currentCount -gt $_ndhSize ]]; then
-		for index in $(seq $_ndhSize $currentCount); do
+        if [[ $currentCount -gt $_ndhSize ]]; then
+            for index in $(seq $_ndhSize $currentCount); do
                 unset _ndhHistory[$index-1] #Funny. Unset can not have space in the index calculation.
             done
         fi
-        
-	nextValue=$_ndhPreviousWorkingDirectory
-          
-        for index in $(seq 1 $_ndhSize)
-        do
+
+        nextValue=$_ndhPreviousWorkingDirectory
+
+        for index in $(seq 1 $_ndhSize); do
             oldValue="${_ndhHistory[$index - 1]}"
-            
+
             _ndhHistory[$index - 1]=$nextValue
 
             if [[ $oldValue == "" || $oldValue == $_ndhPreviousWorkingDirectory ]]; then
@@ -45,9 +44,9 @@ _ndhPrintHistory() {
         echo "Directory history is empty"
         return
     fi
-    
+
     echo "Available history:"
-    
+
     for index in $(seq 1 $count); do
         dirName="${_ndhHistory[$index - 1]}"
         if [[ $PWD == $dirName ]]; then
@@ -65,13 +64,13 @@ _ndhPrintHistory() {
 
 _ndhPromptForIndex() {
     echo "Go To <Enter to stay here>: "
-    
+
     read input
-    
+
     if [[ $input == "" ]]; then
         return
     fi
-    
+
     _ndhGoToIndex $input
 
     if [[ $? -ne 0 ]]; then

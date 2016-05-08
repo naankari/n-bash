@@ -3,7 +3,7 @@
 # Environment
 #       N_HOME
 #               Required: False
-#		Default Value: $HOME/.n
+#        Default Value: $HOME/.n
 #       N_MASTER_SWITCH_FILE
 #               Required: False
 #               Default Value: $HOME/n-bash-on-off
@@ -11,7 +11,7 @@
 
 
 if [[ "$N_HOME" = "" ]]; then
-	export N_HOME="$HOME/.n"
+    export N_HOME="$HOME/.n"
 fi
 export N_LIB="$N_HOME/scripts/lib"
 export N_MODULES="$N_HOME/scripts/modules"
@@ -27,9 +27,9 @@ _nModulesEnalbedFileDefault="$N_DEFAULTS/modules-enabled"
 _nInteractive=$-
 _nLoad() {
     if [[ $_nInteractive != *i* ]]; then
-        	# Shell is non-interactive. Stop.
-        	return
-	fi
+        # Shell is non-interactive. Stop.
+        return
+    fi
 
     source "$N_LIB/lib.sh"
 
@@ -38,21 +38,21 @@ _nLoad() {
         export N_LOG_LEVEL="verbose"
     fi
 
-	if [[ -f $_nMasterSwitchFile ]]; then
-		switchState=$(_nReadEffectiveLine "$_nMasterSwitchFile")
-		switchState=$(_nToLower "$switchState")
-		if [[ $switchState = "off" ]]; then
-			_nLog "Found switch file $_nMasterSwitchFile with '$switchState' state. Will not setup nBash."
-			return
-		fi
-	fi
-	
-	_nLog "Setting up nBash ..."	
-	_nLog "Using $N_HOME as nBash Home."
+    if [[ -f $_nMasterSwitchFile ]]; then
+        switchState=$(_nReadEffectiveLine "$_nMasterSwitchFile")
+        switchState=$(_nToLower "$switchState")
+        if [[ $switchState = "off" ]]; then
+            _nLog "Found switch file $_nMasterSwitchFile with '$switchState' state. Will not setup nBash."
+            return
+        fi
+    fi
 
-	_nLoadModules
+    _nLog "Setting up nBash ..."
+    _nLog "Using $N_HOME as nBash Home."
 
-	_nLog "Finished setting up nBash."
+    _nLoadModules
+
+    _nLog "Finished setting up nBash."
 
     _nLog "Running diagnostics ..."
     _nDiagnostics
@@ -60,19 +60,19 @@ _nLoad() {
 }
 
 _nLoadModules() {
-        if [[ -f $_nModulesEnabledFile ]]; then
-                _nLog "Loading modules from file $_nModulesEnabledFile ..."
-        else
-                _nWarn "Could not read enabled modules file $_nModulesEnabledFile."
-                _nWarn "Copying from default file $_nModulesEnalbedFileDefault ..."
-                cp "$_nModulesEnalbedFileDefault" "$_nModulesEnabledFile"
-        fi
-        modules=$(_nReadEffectiveLines "$_nModulesEnabledFile")
-       	for module in $modules; do
-       		_nLog "Loading module $module ..."
-           	_nSourceIf "$N_MODULES/$module.sh"
-   	done
-  	_nLog "Finished loading modules."
+    if [[ -f $_nModulesEnabledFile ]]; then
+        _nLog "Loading modules from file $_nModulesEnabledFile ..."
+    else
+        _nWarn "Could not read enabled modules file $_nModulesEnabledFile."
+        _nWarn "Copying from default file $_nModulesEnalbedFileDefault ..."
+        cp "$_nModulesEnalbedFileDefault" "$_nModulesEnabledFile"
+    fi
+    modules=$(_nReadEffectiveLines "$_nModulesEnabledFile")
+    for module in $modules; do
+        _nLog "Loading module $module ..."
+        _nSourceIf "$N_MODULES/$module.sh"
+    done
+    _nLog "Finished loading modules."
 }
 
 _nDiagnostics() {

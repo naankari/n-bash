@@ -60,13 +60,13 @@ _nLoad() {
 }
 
 _nLoadModules() {
-    if [[ -f $_nModulesEnabledFile ]]; then
-        _nLog "Loading modules from file $_nModulesEnabledFile ..."
-    else
+    if [[ ! -f $_nModulesEnabledFile ]]; then
         _nWarn "Could not read enabled modules file $_nModulesEnabledFile."
         _nWarn "Copying from default file $_nModulesEnalbedFileDefault ..."
         cp "$_nModulesEnalbedFileDefault" "$_nModulesEnabledFile"
     fi
+
+    _nLog "Loading modules from file $_nModulesEnabledFile ..."
     modules=$(_nReadEffectiveLines "$_nModulesEnabledFile")
     for module in $modules; do
         _nLog "Loading module $module ..."

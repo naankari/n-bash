@@ -11,16 +11,23 @@ _npathSourceFile="$N_HOME/path"
 _npathSourceFileTemplate="$N_TEMPLATES/path"
 
 _npathLoad() {
+    silent="$1"
+
     if [[ "$_N_PATH_ORIG" != "" ]]; then
         export PATH="$_N_PATH_ORIG"
     fi
 
     if [[ ! -f $_npathSourceFile ]]; then
-        _nWarn "Did not find $_npathSourceFile to source path information"
+        if [[ $silent != "yes" ]]; then
+            _nWarn "Did not find $_npathSourceFile to source path information"
+        fi
         return
     fi
 
-    _nLog "Sourcing path info from $_npathSourceFile"
+    if [[ $silent != "yes" ]]; then
+        _nLog "Sourcing path info from $_npathSourceFile"
+    fi
+
     export _N_PATH_ORIG="$PATH"
 
     paths=$(_nReadEffectiveLines "$_npathSourceFile")
@@ -75,7 +82,7 @@ _npathAppendPath() {
 
     echo "$path" >> "$_npathSourceFile"
     echo "Reloading PATH ..."
-    $(_npathLoad)
+    _npathLoad "yes"
 }
 
 _npathLoad

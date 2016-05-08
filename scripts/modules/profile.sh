@@ -91,8 +91,8 @@ _nprofileReinit() {
         echo "$profile" > "$_nprofileTempInputFile"
     fi
 
-    echo "Executing main profile $executableFile ..."
-    source "$executableFile"
+    echo "Executing main profile $shellProfileFile ..."
+    source "$shellProfileFile"
 }
 
 _nprofileiFindShellProfileFile() {

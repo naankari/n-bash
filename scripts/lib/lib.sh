@@ -24,19 +24,19 @@ _nError() {
 }
 
 _nSourceIf() {
-        path=$(_nIndirect "$1")
-        if [[ -f $path ]]; then
-            source "$path"
-        else
-            _nError "File $path could not be sourced."
-        fi
+    path=$(_nIndirect "$1")
+    if [[ -f $path ]]; then
+        source "$path"
+    else
+        _nError "File $path could not be sourced."
+    fi
 }
 
 _nIndirect() {
-        path="$1"
+    path="$1"
     path=${path/\~/$HOME}
     eval "path=\"$path\""
-        echo "$path"
+    echo "$path"
 }
 
 _nReadEffectiveLines() {

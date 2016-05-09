@@ -45,7 +45,7 @@ _npromptLoad() {
 
     profile=${N_PROFILE-none}
     PS1="\`if [[ \$? = 0 ]]; then echo '\[\033[1;32m\][^_^]'; else echo '\[\033[1;31m\][O_O]'; fi\`\
- \[\033[34m\][\$profile]\
+ \[\033[0;34m\][\$profile]\
  \[\033[34m\]\u\
 \[\033[0m\]@\
 \[\033[34m\]\$nhost\

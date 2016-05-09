@@ -66,8 +66,7 @@ _nprofileLoad() {
     if [[ ! -f $profileFile ]]; then
         _nError "Source file $profileFile does not exists."
     else
-        output=$(source "$profileFile")
-        _nLog "$output"
+        source "$profileFile"
         _nLog "Profile setup done."
         export N_PROFILE="$profile"
     fi

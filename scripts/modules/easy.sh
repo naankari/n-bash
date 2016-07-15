@@ -6,7 +6,7 @@ _neasyLoad() {
     ##########################################
     export CLICOLOR=1
     export LSCOLORS=ExFxBxDxCxegedabagacad
-    alias ls="ls -Fh"
+    alias ls="ls -Fh --color=auto"
 
     # Setting history parameters
     ##########################################

@@ -1,5 +1,6 @@
 #!/bin/bash
 
+
 # Profile
 #    N_HOME
 #        Required: True
@@ -9,103 +10,99 @@
 #   N_PROFILE_EXECUTABLE_FILE_PREFIX
 #       Required: False
 #       Default Value: "$N_HOME/profile-"
-#    N_SHELL_PROFILE_FILE
-#        Required: False
-#        Default Value: Valid value will be picked from $N_OPTIONS/shell-profile-files
-#    N_OPTIONS
-#        Required: True
+#    N_PROFILE_SETUP_FN_PREFIX
+#       Required: False
+#       Default Value: "_setup_profile_"
+#    N_PROFILE_TEARDOWN_FN_PREFIX
+#       Required: False
+#       Default Value: "_teardown_profile_"
+#    N_PROFILE_EXPORT_AS
+#       Required: False
+#       Default Value: "workOn"
 
 
-
-_nprofileExecutableFilePrefix=${N_PROFILE_EXECUTABLE_FILE_PREFIX-"$N_HOME/profile-"}
-_nprofileShellProfileFileOptions="$N_OPTIONS/shell-profile-files"
-_nprofileTempInputFile="$N_HOME/.n-profile-temp"
-
-_nprofileFindProfile() {
-    if [[ -f $_nprofileTempInputFile ]]; then
-        profile=$(_nReadEffectiveLine "$_nprofileTempInputFile")
-        echo "$profile"
-        rm "$_nprofileTempInputFile"
-        return
-    fi
-
-    echo "$N_PROFILE"
-}
-
-_nprofileReset() {
-    if [[ "$_N_PROFILE_ORIG" != "" ]]; then
-        origProfile=$_N_PROFILE_ORIG
-        for i in $(env | sed 's/=.*//') ; do
-            if [[ $i != "PATH" ]]; then
-                unset "$i"
-            fi
-        done
-        for line in $origProfile; do
-            name=$(echo $line | sed 's/=.*//')
-            value=$(echo $line | sed 's/.*=//')
-            export $name="$value"
-        done
-        export _N_PROFILE_ORIG="$origProfile"
-    else
-        export _N_PROFILE_ORIG=$(env)
-    fi
-}
+_nprofileExecutableFilePrefix="${N_PROFILE_EXECUTABLE_FILE_PREFIX-$N_HOME/profile-}"
+_nprofileSetupFnPrefix="${N_PROFILE_SETUP_FN_PREFIX-_setup_profile_}"
+_nprofileTeardownFnPrefix="${N_PROFILE_TEARDOWN_FN_PREFIX-_teardown_profile_}"
+_nprofileExportAs="${N_PROFILE_EXPORT_AS-workOn}"
 
 _nprofileLoad() {
-    profile=$(_nprofileFindProfile)
-
-    export N_PROFILE="none"
-
-    if [[ $profile = "" || $profile = "none" ]]; then
-        _nLog "Not setting up any profile."
-        return
+    local profile="$1"
+    if [[ "$profile" == "" ]]; then
+        profile="default"
     fi
+    _nLog "Setting up $profile profile ..."
+    if [[ "$profile" != "default" ]]; then
+        _nprofileInvokeSetup "default"
+    fi
+    _nprofileInvokeSetup "$profile"
+     export N_PROFILE="$profile"
+    _nLog "Profile setup done."
+}
 
-    _nLog "Setting up profile for $profile ..."
-    profileFile="${_nprofileExecutableFilePrefix}${profile}"
+_nprofileInvokeSetup() {
+    local profile="$1"
+    local profileFile="$_nprofileExecutableFilePrefix$profile"
     if [[ ! -f $profileFile ]]; then
         _nError "Source file $profileFile does not exists."
     else
-        _nLog "----- BEGIN -----"
-        source "$profileFile"
-        _nLog "------ END ------"
-        _nLog "Profile setup done."
-        export N_PROFILE="$profile"
+        _nLog "Sourcing file $profileFile ..."
+           _nLog "----- SOURCE BEGIN -----"
+         source "$profileFile"
+        _nLog "----- SOURCE END -----"
+    fi
+    _nProfileInvokeFn "$_nprofileSetupFnPrefix$profile"
+}
+
+_nprofileUnload() {
+    local profile="$1"
+    _nLog "Unloading profile $profile ..."
+    _nprofileInvokeTeardown "$profile"
+    if [[ $profile != "default" ]]; then
+        _nprofileInvokeTeardown "default"
+    fi
+    unset N_PROFILE
+    _nLog "Profile unloading done."
+}
+
+_nprofileInvokeTeardown() {
+    local profile="$1"
+    _nProfileInvokeFn "$_nprofileTeardownFnPrefix$profile"
+}
+
+_nProfileInvokeFn() {
+    local fn="$1"
+    if [[ "$(type -t $fn)" == "function" ]]; then
+        _nLog "Invoking function $fn ..."
+        _nLog "----- FUNCTION INVOCATION BEGIN -----"
+        $fn
+        local retVal=$?
+        _nLog "----- FUNCTION INVOCATION END -----"
+        if [[ $retVal -eq 0 ]]; then
+            _nLog "Function invoked successfully."
+        else
+            _nError "Function failed with errors."
+        fi
+    else
+        _nError "Teardown function $teardownFn does not exists."
     fi
 }
 
 _nprofileReinit() {
-    shellProfileFile=$(_nprofileiFindShellProfileFile)
-
-    if [[ $shellProfileFile = "" ]]; then
-        echo "Please setup N_SHELL_PROFILE_FILE environment variable as the location of your shell profile file. eg: '\$HOME/.profile' or '\$HOME/.bashrc' or whatever."
-        return 1
+    local currentProfile="$N_PROFILE"
+    local newProfile="${1-$N_PROFILE}"
+    if [[ "$currentProfile" != "" ]]; then
+        _nprofileUnload "$currentProfile"
     fi
-
-    if [[ -f $_nprofileTempInputFile ]]; then
-        rm "$_nprofileTempInputFile"
-    fi
-
-    profile="${1-$N_PROFILE}"
-
-    if [[ $profile != "" && $profile != "default" ]]; then
-        echo "$profile" > "$_nprofileTempInputFile"
-    fi
-
-    echo "Executing main profile $shellProfileFile ..."
-    source "$shellProfileFile"
+    _nprofileLoad "$newProfile"
 }
 
-_nprofileiFindShellProfileFile() {
-    if [[ "$N_SHELL_PROFILE_FILE" != "" && -f $N_SHELL_PROFILE_FILE ]]; then
-        echo "$N_SHELL_PROFILE_FILE"
-        return
-    fi
+if [[ "$N_PROFILE" != "" ]]; then
+    _nprofileLoad "$N_PROFILE"
+else
+    _nLog "Not loading any profile."
+fi
 
-    _nFindFirstFileThatExists "$_nprofileShellProfileFileOptions"
-}
+alias $_nprofileExportAs="_nprofileReinit"
 
-#_nprofileReset
-_nprofileLoad
-
-alias reinit="_nprofileReinit"
+_nLog "Use '$_nprofileExportAs <profile>' to setup/switch profile"

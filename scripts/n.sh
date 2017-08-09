@@ -1,25 +1,26 @@
 #!/bin/bash
 
-# Environment
+
+#   Environment
 #       N_HOME
-#               Required: False
-#        Default Value: $HOME/.n
+#           Required: False
+#           Default Value: $HOME/.n
 #       N_MASTER_SWITCH_FILE
-#               Required: False
-#               Default Value: $HOME/n-bash-on-off
+#           Required: False
+#           Default Value: $HOME/n-bash-on-off
 
 
-
-if [[ "$N_HOME" = "" ]]; then
+if [[ "$N_HOME" == "" ]]; then
     export N_HOME="$HOME/.n"
 fi
+
 export N_LIB="$N_HOME/scripts/lib"
 export N_MODULES="$N_HOME/scripts/modules"
 export N_OPTIONS="$N_HOME/scripts/options"
 export N_TEMPLATES="$N_HOME/scripts/templates"
 export N_DEFAULTS="$N_HOME/scripts/defaults"
 
-_nMasterSwitchFile=${N_MASTER_SWITCH_FILE-"$HOME/n-bash-on-off"}
+_nMasterSwitchFile="${N_MASTER_SWITCH_FILE-$HOME/n-bash-on-off}"
 
 _nModulesEnabledFile="$N_HOME/modules-enabled"
 _nModulesEnalbedFileDefault="$N_DEFAULTS/modules-enabled"
@@ -33,15 +34,15 @@ _nLoad() {
 
     source "$N_LIB/lib.sh"
 
-    logLevel=$(_nToLower "$N_LOG_LEVEL")
-    if [[ $logLevel != "verbose" && $logLevel != "warn" && $logLevel != "error" ]]; then
+    local logLevel=$(_nToLower "$N_LOG_LEVEL")
+    if [[ "$logLevel" != "verbose" && "$logLevel" != "warn" && "$logLevel" != "error" ]]; then
         export N_LOG_LEVEL="verbose"
     fi
 
     if [[ -f $_nMasterSwitchFile ]]; then
-        switchState=$(_nReadEffectiveLine "$_nMasterSwitchFile")
+        local switchState=$(_nReadEffectiveLine "$_nMasterSwitchFile")
         switchState=$(_nToLower "$switchState")
-        if [[ $switchState = "off" ]]; then
+        if [[ "$switchState" == "off" ]]; then
             _nLog "Found switch file $_nMasterSwitchFile with '$switchState' state. Will not setup nBash."
             return
         fi
@@ -67,7 +68,7 @@ _nLoadModules() {
     fi
 
     _nLog "Loading modules from file $_nModulesEnabledFile ..."
-    modules=$(_nReadEffectiveLines "$_nModulesEnabledFile")
+    local modules=$(_nReadEffectiveLines "$_nModulesEnabledFile")
     for module in $modules; do
         _nLog "Loading module $module ..."
         _nSourceIf "$N_MODULES/$module.sh"

@@ -6,13 +6,12 @@ _neasyLoad() {
     ##########################################
     export CLICOLOR=1
     export LSCOLORS=ExFxBxDxCxegedabagacad
-    alias ls="ls -Fh --color=auto"
+    alias ls="ls -GFh"
 
     # Setting history parameters
     ##########################################
     export HISTCONTROL=ignorespace,erasedups
     export HISTSIZE=10000
-    export HISTFILESIZE=20000
     shopt -s histappend
 
     # Other

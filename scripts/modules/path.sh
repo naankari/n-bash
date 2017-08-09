@@ -1,32 +1,39 @@
 #!/bin/bash
 
+
 # Environment
-#    N_HOME
+#   N_HOME
 #        Required: True
-#    N_TEMPLATES
-#        Required: True
+#    N_PATH_SOURCE_FILE
+#        Required: False
+#        Default Value: $N_HOME/path
+#    N_PATH_EXPORT_AS
+#        Required: False
+#        Default Value: addPath
+#   N_TEMPLATES
+#       Required: False
+#       Default Value: $N_HOME/templates
 
 
-_npathSourceFile="$N_HOME/path"
-_npathSourceFileTemplate="$N_TEMPLATES/path"
+_npathSourceFile="${N_PATH_SOURCE_FILE-$N_HOME/path}"
+_npathExportAs="${N_PATH_EXPORT_AS-addPath}"
+_npathSourceFileTemplate="${N_TEMPLATES-$N_HOME/templates}/path"
 
 _npathLoad() {
-    silent="$1"
-
     if [[ "$_N_PATH_ORIG" != "" ]]; then
         export PATH="$_N_PATH_ORIG"
     fi
 
-    if [[ ! -f $_npathSourceFile ]]; then
-        if [[ $silent != "yes" ]]; then
-            _nWarn "Did not find $_npathSourceFile to source path information"
-        fi
+    if [[ "$_npathSourceFile" == "" ]]; then
         return
     fi
 
-    if [[ $silent != "yes" ]]; then
-        _nLog "Sourcing path info from $_npathSourceFile"
+    if [[ ! -f $_npathSourceFile ]]; then
+        _nWarn "Did not find $_npathSourceFile to source path information."
+        return
     fi
+
+    _nLog "Sourcing path info from $_npathSourceFile ..."
 
     export _N_PATH_ORIG="$PATH"
 
@@ -36,55 +43,63 @@ _npathLoad() {
     done
 
     export PATH
+
+    _nLog "Sourcing path info done."
 }
 
 _npathAppendPath() {
-    path="$1"
-    cwd=$(pwd)
-    if [[ $path = "" || $path = "." ]]; then
-        path=$cwd
+    local path="$1"
+    if [[ "$path" == "" || "$path" == "." ]]; then
+        path="$PWD"
     fi
 
     path=$(_nIndirect "$path")
 
-    if [[ -f $_npathSourceFile ]]; then
-        exits=$(cat "$_npathSourceFile" | grep -i "^$path$" | wc -l)
-        if [[ $exits -gt 0 ]]; then
-            echo "$path already exists in PATH"
-            return
-        fi
-    fi
-
     echo "Adding $path in PATH ..."
     echo "Enter 'y' or 'yes' to confirm:"
 
+    local input
     read input
     input=$(_nToLower "$input")
-
-    if [[ $input != "y" && $input != "yes" ]]; then
+    if [[ "$input" != "y" && "$input" != "yes" ]]; then
         echo "Exiting."
-        return 1
+        return
     fi
 
+    export PATH="$path:$PATH"
+
+    if [[ "$_npathSourceFile" == "" ]]; then
+        return
+    fi
+
+    echo "Saving new path entry $path in source file $_npathSourceFile ..."
+
     if [[ ! -f $_npathSourceFile ]]; then
-        echo "Did not find file $_npathSourceFile to source path information."
+        echo "Did not find file $_npathSourceFile!"
         echo "Enter 'y' or 'yes' to create one and continue:"
         read input
         input=$(_nToLower "$input")
-        if [[ $input = "y" || $input = "yes" ]]; then
+        if [[ "$input" == "y" || "$input" == "yes" ]]; then
             cp "$_npathSourceFileTemplate" "$_npathSourceFile"
             echo "Created file $_npathSourceFile to source path information."
         else
             echo "Exiting."
-            return 1
+            return
+        fi
+    else
+        exits=$(cat "$_npathSourceFile" | grep -i "^$path$" | wc -l)
+        if [[ $exits -gt 0 ]]; then
+            echo "$path already exists in source file $_npathSourceFile."
+            return
         fi
     fi
 
     echo "$path" >> "$_npathSourceFile"
-    echo "Reloading PATH ..."
-    _npathLoad "yes"
+    echo "Saved path entry."
 }
 
 _npathLoad
 
-alias pathAdd="_npathAppendPath"
+alias $_npathExportAs="_npathAppendPath"
+
+_nLog "Use '$_npathExportAs .|<directory name>' to add the current or specific directory to the path."

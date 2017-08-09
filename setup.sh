@@ -1,7 +1,6 @@
 #!/bin/bash
 
 
-
 branch=${1-master}
 
 nHome="$HOME/.n"

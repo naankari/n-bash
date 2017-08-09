@@ -1,45 +1,35 @@
 #!/bin/bash
 
-# Environment
-#       N_DIR_HISTORY_SIZE
-#               Required: False
-#               Default Value: 10
 
+# Environment
+#   N_DIR_HISTORY_SIZE
+#       Required: False
+#       Default Value: 10
+#   N_DIR_EXPORT_AS
+#       Required: False
+#       Default Value: "dh"
 
 
 _ndhSize=${N_DIR_HISTORY_SIZE-10}
+_ndhExportAs="${N_DIR_EXPORT_AS-dh}"
 
 _ndhHistory=()
-_ndhPreviousWorkingDirectory=""
 
 _ndhUpdateHistory() {
-    if [[ $_ndhPreviousWorkingDirectory != "" &&  $PWD != $_ndhPreviousWorkingDirectory ]]; then
-        currentCount=${#_ndhHistory[@]}
-        if [[ $currentCount -gt $_ndhSize ]]; then
-            for index in $(seq $_ndhSize $currentCount); do
-                unset _ndhHistory[$index-1] #Funny. Unset can not have space in the index calculation.
-            done
+    local cwd="$PWD"
+    local nextValue="$cwd"
+    for index in $(seq 1 $_ndhSize); do
+        local oldValue="${_ndhHistory[$index - 1]}"
+        _ndhHistory[$index - 1]="$nextValue"
+        if [[ "$oldValue" == "" || "$oldValue" == "$cwd" ]]; then
+            break
         fi
-
-        nextValue=$_ndhPreviousWorkingDirectory
-
-        for index in $(seq 1 $_ndhSize); do
-            oldValue="${_ndhHistory[$index - 1]}"
-
-            _ndhHistory[$index - 1]=$nextValue
-
-            if [[ $oldValue == "" || $oldValue == $_ndhPreviousWorkingDirectory ]]; then
-                break
-            fi
-            nextValue=$oldValue
-        done
-    fi
-
-    _ndhPreviousWorkingDirectory=$PWD
+        nextValue="$oldValue"
+    done
 }
 
 _ndhPrintHistory() {
-    count=${#_ndhHistory[@]}
+    local count="${#_ndhHistory[@]}"
     if [[ $count -eq 0 ]]; then
         echo "Directory history is empty"
         return
@@ -47,12 +37,15 @@ _ndhPrintHistory() {
 
     echo "Available history:"
 
-    for index in $(seq 1 $count); do
-        dirName="${_ndhHistory[$index - 1]}"
-        if [[ $PWD == $dirName ]]; then
+    for index in $(seq 1 $_ndhSize); do
+        local dirName="${_ndhHistory[$index - 1]}"
+        if [[ "$dirName" == "" ]]; then
+            break
+        fi
+
+        local isCurrent=""
+        if [[ "$PWD" == "$dirName" ]]; then
             isCurrent="(*)"
-        else
-            isCurrent=""
         fi
         echo "[$index]: $dirName $isCurrent"
     done
@@ -63,15 +56,15 @@ _ndhPrintHistory() {
 }
 
 _ndhPromptForIndex() {
-    echo "Go To <Enter to stay here>: "
-
+    echo "Go To: (Enter to stay here): "
+    local input
     read input
 
-    if [[ $input == "" ]]; then
+    if [[ "$input" == "" ]]; then
         return
     fi
 
-    _ndhGoToIndex $input
+    _ndhGoToIndex "$input"
 
     if [[ $? -ne 0 ]]; then
         _ndhPromptForIndex
@@ -84,7 +77,7 @@ _ndhGoToIndex() {
         return 1
     fi
 
-    index="$1"
+    local index="$1"
 
     if ! [[ $index =~ ^[0-9]+$ ]]; then
         echo "[ERROR] Invalid input"
@@ -96,9 +89,9 @@ _ndhGoToIndex() {
         return 3
     fi
 
-    dirName="${_ndhHistory[$index - 1]}"
+    local dirName="${_ndhHistory[$index - 1]}"
 
-    if [[ $dirName == "" ]]; then
+    if [[ "$dirName" == "" ]]; then
         echo "[ERROR] This history record does not exist"
         return 3
     fi
@@ -109,12 +102,13 @@ _ndhGoToIndex() {
 
 _ndhCleanHistory() {
     _ndhHistory=()
+    _ndhUpdateHistory
     echo "History cleaned"
 }
 
 _ndhPrintUsage() {
     echo "Usage:"
-    echo "${_ndhProgramName-Program}"
+    echo "${_ndhExportAs}"
     echo "          Show the history and prompt for the input"
     echo "[Optional]"
     echo "    -c"
@@ -133,7 +127,7 @@ _ndh() {
         return $?
     fi
 
-    input="$1"
+    local input="$1"
 
     if [[ $input == "-i" ]]; then
         _ndhPrintHistory
@@ -166,5 +160,6 @@ _ndhLoad() {
 
 _ndhLoad
 
-_ndhProgramName="dh"
-alias dh="_ndh"
+alias $_ndhExportAs="_ndh"
+
+_nLog "Use '$_ndhExportAs -?' to know more about directory hostory command."

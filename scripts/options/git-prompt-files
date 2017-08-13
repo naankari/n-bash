@@ -2,3 +2,5 @@
 
 /usr/local/git/contrib/completion/git-prompt.sh
 /etc/bash_completion.d/git-prompt
+/usr/local/Cellar/git/*/etc/bash_completion.d/git-prompt.sh
+

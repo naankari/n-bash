@@ -49,11 +49,8 @@ _npathLoad() {
 
 _npathAppendPath() {
     local path="$1"
-    if [[ "$path" == "" || "$path" == "." ]]; then
-        path="$PWD"
-    fi
 
-    path=$(_nIndirect "$path")
+    path=$(_nAbsolutePath "$path")
 
     echo "Adding $path in PATH ..."
     echo "Enter 'y' or 'yes' to confirm:"

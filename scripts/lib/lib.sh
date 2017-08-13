@@ -23,7 +23,7 @@ _nError() {
 }
 
 _nSourceIf() {
-   local  path=$(_nIndirect "$1")
+   local path=$(_nIndirect "$1")
     if [[ -f $path ]]; then
         source $path
     else
@@ -35,6 +35,23 @@ _nIndirect() {
     local path="$1"
     path=${path/\~/$HOME}
     eval "path=\"$path\""
+    echo "$path"
+}
+
+_nAbsolutePath() {
+    local path=$(_nIndirect "$1")
+
+    if [[ "$path" == "." || "$path" == "" ]]; then
+        path="./"
+    fi
+
+    local cwd="$PWD/"
+    path=${path/\.\//$cwd}
+
+    if [[ "$path" != /* ]]; then
+        path="$cwd$path"
+    fi
+
     echo "$path"
 }
 

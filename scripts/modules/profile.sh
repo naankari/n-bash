@@ -44,7 +44,7 @@ _nprofileInvokeSetup() {
     local profile="$1"
     local profileFile="$_nprofileExecutableFilePrefix$profile"
     if [[ ! -f $profileFile ]]; then
-        _nError "Source file $profileFile does not exists."
+        _nError "Source file $profileFile does not exist."
     else
         _nLog "Sourcing file $profileFile ..."
            _nLog "----- SOURCE BEGIN -----"
@@ -84,7 +84,7 @@ _nProfileInvokeFn() {
             _nError "Function failed with errors."
         fi
     else
-        _nError "Teardown function $teardownFn does not exists."
+        _nError "Function $fn does not exist."
     fi
 }
 

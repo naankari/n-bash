@@ -4,35 +4,65 @@
 #   Environment
 #       N_HOME
 #           Required: False
-#           Default Value: $HOME/.n
+#           Default Value: "$HOME/.n"
+#       N_LOCAL
+#           Required: False
+#           Default Value: "$N_HOME/local"
+#       N_LIB
+#           Required: False
+#           Default Value: "$N_HOME/scripts/lib"
+#       N_MODULES_DIR
+#           Required: False
+#           Default Value: "$N_HOME/scripts/modules"
+#       N_OPTIONS_DIR
+#           Required: False
+#           Default Value: "$N_HOME/scripts/options"
+#       N_TEMPLATES_DIR
+#           Required: False
+#           Default Value: "$N_HOME/scripts/templates"
+#       N_DEFAULTS_DIR
+#           Required: False
+#           Default Value: "$N_HOME/scripts/defaults"
 #       N_MASTER_SWITCH_FILE
 #           Required: False
-#           Default Value: $HOME/n-bash-on-off
-
+#           Default Value: "$HOME/n-bash-on-off"
+#       N_MODULES_ENABLED_FILE
+#           Required: False
+#           Default Value: "$N_LOCAL/modules-enabled"; initialized from default "$N_DEFAULTS_DIR/modules-enabled"
 
 if [[ "$N_HOME" == "" ]]; then
     export N_HOME="$HOME/.n"
 fi
 
-export N_LIB="$N_HOME/scripts/lib"
-export N_MODULES="$N_HOME/scripts/modules"
-export N_OPTIONS="$N_HOME/scripts/options"
-export N_TEMPLATES="$N_HOME/scripts/templates"
-export N_DEFAULTS="$N_HOME/scripts/defaults"
+export N_LOCAL="${N_LOCAL-$N_HOME/local}"
+export N_LIB="${N_LIB-$N_HOME/scripts/lib}"
+export N_MODULES_DIR="${N_MODULES_DIR-$N_HOME/scripts/modules}"
+export N_OPTIONS_DIR="${N_OPTIONS_DIR-$N_HOME/scripts/options}"
+export N_TEMPLATES_DIR="${N_TEMPLATES_DIR-$N_HOME/scripts/templates}"
+export N_DEFAULTS_DIR="${N_DEFAULTS_DIR-$N_HOME/scripts/defaults}"
 
-_nMasterSwitchFile="${N_MASTER_SWITCH_FILE-$HOME/n-bash-on-off}"
+source "$N_LIB/lib.sh"
 
-_nModulesEnabledFile="$N_HOME/modules-enabled"
-_nModulesEnalbedFileDefault="$N_DEFAULTS/modules-enabled"
+_nMasterSwitchFile="$(_nAbsolutePath "${N_MASTER_SWITCH_FILE-$HOME/n-bash-on-off}")"
+_nModulesEnabledFile="$(_nAbsolutePath "${N_MODULES_ENABLED_FILE-$N_LOCAL/modules-enabled}")"
+_nModulesEnalbedFileDefault="$(_nAbsolutePath "$N_DEFAULTS_DIR/modules-enabled")"
 
-_nInteractive=$-
-_nLoad() {
-    if [[ $_nInteractive != *i* ]]; then
+_nInit() {
+    export N_LOAD_STAGE="init"
+
+    _nInitInternal
+    local status=$?
+
+    export N_LOAD_STAGE="runtime"
+    return $status 
+}
+
+_nInitInternal() {
+    local interactive=$-
+    if [[ $interactive != *i* ]]; then
         # Shell is non-interactive. Stop.
         return
-    fi
-
-    source "$N_LIB/lib.sh"
+    fi    
 
     local logLevel=$(_nToLower "$N_LOG_LEVEL")
     if [[ "$logLevel" != "verbose" && "$logLevel" != "warn" && "$logLevel" != "error" ]]; then
@@ -63,15 +93,21 @@ _nLoad() {
 _nLoadModules() {
     if [[ ! -f $_nModulesEnabledFile ]]; then
         _nWarn "Could not read enabled modules file $_nModulesEnabledFile."
-        _nWarn "Copying from default file $_nModulesEnalbedFileDefault ..."
-        cp "$_nModulesEnalbedFileDefault" "$_nModulesEnabledFile"
+        if [[ -f $_nModulesEnalbedFileDefault ]]; then
+            _nLog "Copying from default file $_nModulesEnalbedFileDefault ..."            
+            _nEnsureParentDirectoryExists "$_nModulesEnabledFile"
+            cp "$_nModulesEnalbedFileDefault" "$_nModulesEnabledFile"
+        else
+            _nWarn "Skipping loading modues!"
+            return
+        fi
     fi
 
     _nLog "Loading modules from file $_nModulesEnabledFile ..."
     local modules=$(_nReadEffectiveLines "$_nModulesEnabledFile")
     for module in $modules; do
         _nLog "Loading module $module ..."
-        _nSourceIf "$N_MODULES/$module.sh"
+        _nSourceIf "$N_MODULES_DIR/$module.sh"
     done
     _nLog "Finished loading modules."
 }
@@ -80,4 +116,5 @@ _nDiagnostics() {
     _nLibDiagnostics
 }
 
-_nLoad
+_nInit
+

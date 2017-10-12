@@ -2,22 +2,20 @@
 
 
 # Environment
-#   N_HOME
+#   N_LOCAL
+#       Required: True
+#   N_OPTIONS_DIR
 #       Required: True
 #   N_PROMPT_HOST_FILE
 #       Required: False
-#       Default Value: $N_HOME/hostname
-#   N_OPTIONS
-#       Required: False
-#       Default Value: $N_HOME/options
+#       Default Value: "$N_LOCAL/hostname"
 #   N_PROMPT_GIT_PROMPT_FILE
 #       Required: False
-#       Default Value: Valid value will be picked from $N_OPTIONS/git-prompt-files
+#       Default Value: Valid value will be picked from options file "$N_OPTIONS_DIR/git-prompt-files"
 
-
-_npromptHostnameFile="${N_PROMPT_HOST_FILE-$N_HOME/hostname}"
-_npromptGitPromptFile="$N_PROMPT_GIT_PROMPT_FILE"
-_npromptGitPromptFileOptions="${N_OPTIONS-$N_HOME/options}/git-prompt-files"
+_npromptHostnameFile="$(_nAbsolutePath "${N_PROMPT_HOST_FILE-$N_LOCAL/hostname}")"
+_npromptGitPromptFile="$(_nAbsolutePath "$N_PROMPT_GIT_PROMPT_FILE")"
+_npromptGitPromptFileOptions="$(_nAbsolutePath "$N_OPTIONS_DIR/git-prompt-files")"
 
 __git_ps1() {
     echo ""
@@ -40,7 +38,7 @@ _npromptCurrentHostname_ps1() {
 _npromptSourceGitPrompt() {
     if [[ "$_npromptGitPromptFile" != "" ]]; then
         if [[ ! -f $_npromptGitPromptFile ]]; then
-            _nError "Could not find git promot file $_npromptGitPromptFile."
+            _nError "Could not find git promot file $_npromptGitPromptFile!"
             return
         fi
         source $_npromptGitPromptFile
@@ -51,13 +49,13 @@ _npromptSourceGitPrompt() {
     if [[ "$gitPromotFileOption" != "" ]]; then
         source $gitPromotFileOption
     else
-        _nWarn "Could not file any git prompt file."
+        _nWarn "Could not file any git prompt file!"
     fi
 }
 
-_npromptLoad() {
+_npromptInit() {
     if [[ ! -f $_npromptHostnameFile ]]; then
-        _nWarn "Could not find hostname file $_npromptHostnameFile."
+        _nWarn "Could not find hostname file $_npromptHostnameFile!"
     fi
     _npromptSourceGitPrompt
 
@@ -74,4 +72,5 @@ _npromptLoad() {
 \[\033[0m\]"
 }
 
-_npromptLoad
+_npromptInit
+

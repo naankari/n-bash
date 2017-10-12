@@ -1,6 +1,14 @@
 #!/bin/bash
 
 
+# Environment
+#   N_LOG_LEVEL
+#       Required: False
+#       Default Value: <none>
+#   N_LOAD_STAGE
+#       Required: False
+#       Default Value: <none>
+
 _nLog() {
     local logLevel=$(_nToLower "$N_LOG_LEVEL")
     if [[ "$logLevel" == "verbose" ]]; then
@@ -22,12 +30,41 @@ _nError() {
     fi
 }
 
+_nLogOrEcho() {
+    if [[ "$N_LOAD_STAGE" == "runtime" ]]; then
+        echo "$1"
+        return
+    fi
+
+    _nLog "$1"
+    return $?
+}
+
+_nWarnOrEcho() {
+    if [[ "$N_LOAD_STAGE" == "runtime" ]]; then
+        echo "[WARN] $1"
+        return
+    fi
+
+    _nWarn "$1"
+    return $?
+}
+
+_nErrorOrEcho() {
+    if [[ "$N_LOAD_STAGE" == "runtime" ]]; then
+        echo "[ERROR] $1"
+        return
+    fi
+    _nError "$1"
+    return $?
+}
+
 _nSourceIf() {
    local path=$(_nIndirect "$1")
     if [[ -f $path ]]; then
         source $path
     else
-        _nError "File $path could not be sourced."
+        _nError "File $path could not be sourced!"
     fi
 }
 
@@ -39,9 +76,15 @@ _nIndirect() {
 }
 
 _nAbsolutePath() {
-    local path=$(_nIndirect "$1")
+    local path="$1"
 
-    if [[ "$path" == "." || "$path" == "" ]]; then
+    if [[ "$path" == "" ]]; then
+        return
+    fi
+
+    path=$(_nIndirect "$path")
+
+    if [[ "$path" == "." ]]; then
         path="./"
     fi
 
@@ -53,6 +96,15 @@ _nAbsolutePath() {
     fi
 
     echo "$path"
+}
+
+_nEnsureDirectoryExists() {
+    mkdir -p "$1"
+}
+
+_nEnsureParentDirectoryExists() {
+    local filePath="$1"
+    mkdir -p "$(dirname "$filePath")"
 }
 
 _nReadEffectiveLines() {
@@ -144,6 +196,7 @@ _nLibDiagnostics() {
 
 _nTestCaseConversion() {
     if [[ $(_nToUpper "abc") != "ABC" ]]; then
-        _nWarn "Could not convert to uppercase. Case insensitive things may not work."
+        _nWarn "Could not convert to uppercase. Case insensitive things may not work!"
     fi
 }
+

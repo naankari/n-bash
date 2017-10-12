@@ -1,7 +1,7 @@
 #!/bin/bash
 
 
-_neasyLoad() {
+_neasyInit() {
     # Setting color
     ##########################################
     export CLICOLOR=1
@@ -21,4 +21,5 @@ _neasyLoad() {
     export EDITOR=vim
 }
 
-_neasyLoad
+_neasyInit
+

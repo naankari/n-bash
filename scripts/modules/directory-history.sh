@@ -9,7 +9,6 @@
 #       Required: False
 #       Default Value: "dh"
 
-
 _ndhSize=${N_DIR_HISTORY_SIZE-10}
 _ndhExportAs="${N_DIR_EXPORT_AS-dh}"
 
@@ -18,9 +17,9 @@ _ndhHistory=()
 _ndhUpdateHistory() {
     local cwd="$PWD"
     local nextValue="$cwd"
-    for index in $(seq 1 $_ndhSize); do
-        local oldValue="${_ndhHistory[$index - 1]}"
-        _ndhHistory[$index - 1]="$nextValue"
+    for index in $(seq 0 $(expr $_ndhSize - 1)); do
+        local oldValue="${_ndhHistory[$index]}"
+        _ndhHistory[$index]="$nextValue"
         if [[ "$oldValue" == "" || "$oldValue" == "$cwd" ]]; then
             break
         fi
@@ -28,17 +27,21 @@ _ndhUpdateHistory() {
     done
 }
 
+_ndhInit() {
+    export PROMPT_COMMAND=_ndhUpdateHistory
+}
+
 _ndhPrintHistory() {
     local count="${#_ndhHistory[@]}"
     if [[ $count -eq 0 ]]; then
-        echo "Directory history is empty"
+        echo "Directory history is empty."
         return
     fi
 
     echo "Available history:"
 
-    for index in $(seq 1 $_ndhSize); do
-        local dirName="${_ndhHistory[$index - 1]}"
+    for index in $(seq 0 $(expr $_ndhSize - 1)); do
+        local dirName="${_ndhHistory[$index]}"
         if [[ "$dirName" == "" ]]; then
             break
         fi
@@ -53,6 +56,35 @@ _ndhPrintHistory() {
     if [[ "$1" == "-showPrompt" ]]; then
         _ndhPromptForIndex
     fi
+}
+
+_ndhGoToIndex() {
+    if [[ $# -ne 1 ]]; then
+        echo "[ERROR] Missing input!"
+        return 1
+    fi
+
+    local index="$1"
+
+    if ! [[ $index =~ ^[0-9]+$ ]]; then
+        echo "[ERROR] Invalid input!"
+        return 2
+    fi
+
+    if [[ $index -lt 0 ]]; then
+        echo "[ERROR] Invalid input!"
+        return 3
+    fi
+
+    local dirName="${_ndhHistory[$index]}"
+
+    if [[ "$dirName" == "" ]]; then
+        echo "[ERROR] This history record does not exist!"
+        return 3
+    fi
+
+    echo "Changing dir to: $dirName"
+    cd "$dirName"
 }
 
 _ndhPromptForIndex() {
@@ -71,54 +103,25 @@ _ndhPromptForIndex() {
     fi
 }
 
-_ndhGoToIndex() {
-    if [[ $# -ne 1 ]]; then
-        echo "[ERROR] Missing input"
-        return 1
-    fi
-
-    local index="$1"
-
-    if ! [[ $index =~ ^[0-9]+$ ]]; then
-        echo "[ERROR] Invalid input"
-        return 2
-    fi
-
-    if [[ $(expr $index - 1) -lt 0 ]]; then
-        echo "[ERROR] Invalid input"
-        return 3
-    fi
-
-    local dirName="${_ndhHistory[$index - 1]}"
-
-    if [[ "$dirName" == "" ]]; then
-        echo "[ERROR] This history record does not exist"
-        return 3
-    fi
-
-    echo "Changing dir to: $dirName"
-    cd "$dirName"
-}
-
 _ndhCleanHistory() {
     _ndhHistory=()
     _ndhUpdateHistory
-    echo "History cleaned"
+    echo "History cleaned."
 }
 
 _ndhPrintUsage() {
     echo "Usage:"
-    echo "${_ndhExportAs}"
-    echo "          Show the history and prompt for the input"
+    echo "$_ndhExportAs"
+    echo "          Show the history and prompt for the input."
     echo "[Optional]"
     echo "    -c"
-    echo "          Clean the history"
+    echo "          Clean the history."
     echo "    <num>"
-    echo "          Change directory to the given index in history"
+    echo "          Change directory to the given index in history."
     echo "    -i"
-    echo "          Show the history alone; do not prompt for the input"
+    echo "          Show the history alone; do not prompt for the input."
     echo "    -?"
-    echo "          Show this message"
+    echo "          Show this message."
 }
 
 _ndh() {
@@ -149,17 +152,14 @@ _ndh() {
         return $?
     fi
 
-    echo "Wrong use"
+    echo "[ERROR] Wrong usage!"
     _ndhPrintUsage
     return 1
 }
 
-_ndhLoad() {
-    export PROMPT_COMMAND=_ndhUpdateHistory
-}
-
-_ndhLoad
+_ndhInit
 
 alias $_ndhExportAs="_ndh"
 
 _nLog "Use '$_ndhExportAs -?' to know more about directory hostory command."
+

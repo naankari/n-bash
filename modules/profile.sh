@@ -2,14 +2,14 @@
 
 
 # Profile
-#    N_LOCAL
+#    N_CONFIG_DIR
 #        Required: True
 #    N_PROFILE
 #        Required: False
 #        Default Value: <none>
 #   N_PROFILE_EXECUTABLE_FILE_PREFIX
 #       Required: False
-#       Default Value: "$N_LOCAL/profile-"
+#       Default Value: "$N_CONFIG_DIR/profile-"
 #    N_PROFILE_SETUP_FN_PREFIX
 #       Required: False
 #       Default Value: "_setup_profile_"
@@ -20,7 +20,7 @@
 #       Required: False
 #       Default Value: "workOn"
 
-_nprofileExecutableFilePrefix="$(_nAbsolutePath "${N_PROFILE_EXECUTABLE_FILE_PREFIX-$N_LOCAL/profile-}")"
+_nprofileExecutableFilePrefix="$(_nAbsolutePath "${N_PROFILE_EXECUTABLE_FILE_PREFIX-$N_CONFIG_DIR/profile-}")"
 _nprofileSetupFnPrefix="${N_PROFILE_SETUP_FN_PREFIX-_setup_profile_}"
 _nprofileTeardownFnPrefix="${N_PROFILE_TEARDOWN_FN_PREFIX-_teardown_profile_}"
 _nprofileExportAs="${N_PROFILE_EXPORT_AS-workOn}"

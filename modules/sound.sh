@@ -2,16 +2,16 @@
 
 
 # Environment
-#   N_LOCAL
+#   N_CONFIG_DIR
 #       Required: True
 #   N_SOUND_CURRENT_OUTPUT_CHANNEL_FILE
 #       Required: False
-#       Default Value: "$N_LOCAL/sound-current-output-channel"
+#       Default Value: "$N_CONFIG_DIR/sound-current-output-channel"
 #   N_SOUND_EXPORT_AS
 #        Required: False
 #        Default Value: "sound"
 
-_nsoundCurrentOutputChannelFile="$(_nAbsolutePath "${N_SOUND_CURRENT_CHANNEL_OUTPUT_FILE-$N_LOCAL/sound-current-output-channel}")"
+_nsoundCurrentOutputChannelFile="$(_nAbsolutePath "${N_SOUND_CURRENT_CHANNEL_OUTPUT_FILE-$N_CONFIG_DIR/sound-current-output-channel}")"
 _nsoundExportAs="${N_SOUND_EXPORT_AS-sound}"
 
 _nsoundSpeakers() {

@@ -2,18 +2,18 @@
 
 
 # Environment
-#   N_LOCAL
+#   N_CONFIG_DIR
 #        Required: True
 #   N_TEMPLATES_DIR
 #       Required: True
 #    N_PATH_SOURCE_FILE
 #        Required: False
-#        Default Value: $N_LOCAL/path
+#        Default Value: $N_CONFIG_DIR/path
 #    N_PATH_EXPORT_AS
 #        Required: False
 #        Default Value: "path"
 
-_npathSourceFile="$(_nAbsolutePath "${N_PATH_SOURCE_FILE-$N_LOCAL/path}")"
+_npathSourceFile="$(_nAbsolutePath "${N_PATH_SOURCE_FILE-$N_CONFIG_DIR/path}")"
 _npathSourceFileTemplate="$(_nAbsolutePath "$N_TEMPLATES_DIR/path")"
 _npathExportAs="${N_PATH_EXPORT_AS-path}"
 

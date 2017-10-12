@@ -5,46 +5,46 @@
 #       N_HOME
 #           Required: False
 #           Default Value: "$HOME/.n"
-#       N_LOCAL
+#       N_CONFIG_DIR
 #           Required: False
-#           Default Value: "$N_HOME/local"
+#           Default Value: "$HOME/.nconfig"
 #       N_LIB
 #           Required: False
-#           Default Value: "$N_HOME/scripts/lib"
+#           Default Value: "$N_HOME/lib"
 #       N_MODULES_DIR
 #           Required: False
-#           Default Value: "$N_HOME/scripts/modules"
+#           Default Value: "$N_HOME/modules"
 #       N_OPTIONS_DIR
 #           Required: False
-#           Default Value: "$N_HOME/scripts/options"
+#           Default Value: "$N_HOME/options"
 #       N_TEMPLATES_DIR
 #           Required: False
-#           Default Value: "$N_HOME/scripts/templates"
+#           Default Value: "$N_HOME/templates"
 #       N_DEFAULTS_DIR
 #           Required: False
-#           Default Value: "$N_HOME/scripts/defaults"
+#           Default Value: "$N_HOME/defaults"
 #       N_MASTER_SWITCH_FILE
 #           Required: False
 #           Default Value: "$HOME/n-bash-on-off"
 #       N_MODULES_ENABLED_FILE
 #           Required: False
-#           Default Value: "$N_LOCAL/modules-enabled"; initialized from default "$N_DEFAULTS_DIR/modules-enabled"
+#           Default Value: "$N_CONFIG_DIR/modules-enabled"; initialized from default "$N_DEFAULTS_DIR/modules-enabled"
 
 if [[ "$N_HOME" == "" ]]; then
     export N_HOME="$HOME/.n"
 fi
 
-export N_LOCAL="${N_LOCAL-$N_HOME/local}"
-export N_LIB="${N_LIB-$N_HOME/scripts/lib}"
-export N_MODULES_DIR="${N_MODULES_DIR-$N_HOME/scripts/modules}"
-export N_OPTIONS_DIR="${N_OPTIONS_DIR-$N_HOME/scripts/options}"
-export N_TEMPLATES_DIR="${N_TEMPLATES_DIR-$N_HOME/scripts/templates}"
-export N_DEFAULTS_DIR="${N_DEFAULTS_DIR-$N_HOME/scripts/defaults}"
+export N_CONFIG_DIR="${N_CONFIG_DIR-$HOME/.nconfig}"
+export N_LIB="${N_LIB-$N_HOME/lib}"
+export N_MODULES_DIR="${N_MODULES_DIR-$N_HOME/modules}"
+export N_OPTIONS_DIR="${N_OPTIONS_DIR-$N_HOME/options}"
+export N_TEMPLATES_DIR="${N_TEMPLATES_DIR-$N_HOME/templates}"
+export N_DEFAULTS_DIR="${N_DEFAULTS_DIR-$N_HOME/defaults}"
 
 source "$N_LIB/lib.sh"
 
 _nMasterSwitchFile="$(_nAbsolutePath "${N_MASTER_SWITCH_FILE-$HOME/n-bash-on-off}")"
-_nModulesEnabledFile="$(_nAbsolutePath "${N_MODULES_ENABLED_FILE-$N_LOCAL/modules-enabled}")"
+_nModulesEnabledFile="$(_nAbsolutePath "${N_MODULES_ENABLED_FILE-$N_CONFIG_DIR/modules-enabled}")"
 _nModulesEnalbedFileDefault="$(_nAbsolutePath "$N_DEFAULTS_DIR/modules-enabled")"
 
 _nInit() {

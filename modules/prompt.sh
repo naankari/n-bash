@@ -2,18 +2,18 @@
 
 
 # Environment
-#   N_LOCAL
+#   N_CONFIG_DIR
 #       Required: True
 #   N_OPTIONS_DIR
 #       Required: True
 #   N_PROMPT_HOST_FILE
 #       Required: False
-#       Default Value: "$N_LOCAL/hostname"
+#       Default Value: "$N_CONFIG_DIR/hostname"
 #   N_PROMPT_GIT_PROMPT_FILE
 #       Required: False
 #       Default Value: Valid value will be picked from options file "$N_OPTIONS_DIR/git-prompt-files"
 
-_npromptHostnameFile="$(_nAbsolutePath "${N_PROMPT_HOST_FILE-$N_LOCAL/hostname}")"
+_npromptHostnameFile="$(_nAbsolutePath "${N_PROMPT_HOST_FILE-$N_CONFIG_DIR/hostname}")"
 _npromptGitPromptFile="$(_nAbsolutePath "$N_PROMPT_GIT_PROMPT_FILE")"
 _npromptGitPromptFileOptions="$(_nAbsolutePath "$N_OPTIONS_DIR/git-prompt-files")"
 

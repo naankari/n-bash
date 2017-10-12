@@ -1,8 +1,8 @@
 #!/bin/bash
 set -e
 
-branch=${1-master}
-mode=${2-git}
+branch="${1-master}"
+mode="${2-git}"
 
 nHome="$HOME/.n"
 targetDirectory="$nHome"
@@ -45,9 +45,12 @@ if [[ "$mode" == "archive" ]]; then
     mkdir -p "$targetDirectory"
     mv "$extractionDir/$archiveContainerDirectory"/* "$targetDirectory/"
     echo "Done copying files."
-else
+elif [[ "$mode" == "git" ]]; then
     git clone https://github.com/naankari/n-bash.git "$targetDirectory"
     git checkout "$branch"
+else
+    echo "[ERROR] Wrong setup mode $mode!"
+    return
 fi
 
 

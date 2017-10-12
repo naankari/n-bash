@@ -4,6 +4,9 @@ set -e
 branch="${1-master}"
 mode="${2-git}"
 
+cwd=$(pwd)
+cd $HOME
+
 nHome="$HOME/.n"
 targetDirectory="$nHome"
 masterSwitchFile="$HOME/n-bash-on-off"
@@ -47,6 +50,7 @@ if [[ "$mode" == "archive" ]]; then
     echo "Done copying files."
 elif [[ "$mode" == "git" ]]; then
     git clone https://github.com/naankari/n-bash.git "$targetDirectory"
+    cd "$targetDirectory"
     git checkout "$branch"
 else
     echo "[ERROR] Wrong setup mode $mode!"
@@ -75,5 +79,6 @@ echo "source \"\$N_HOME/n.sh\""
 echo "#################### TILL HERE ####################"
 
 echo -e "\n\nnBash setup completed."
+cd $cwd
 
 

@@ -1,19 +1,21 @@
 # n-bash
 
 
-**To setup via git mode (Requires git):**
+**To setup via git mode (requires wget and git):**
 ```
-branch="master" \
+mode="git" \
+&& branch="master" \
 && wget "https://raw.githubusercontent.com/naankari/n-bash/$branch/setup.sh" -O /tmp/nbash-setup.sh \
-&& /bin/bash /tmp/nbash-setup.sh $branch "git"\
+&& /bin/bash /tmp/nbash-setup.sh "$branch" "$mode" \
 && rm -rf /tmp/nbash-setup.sh
 ```
 
-**To setup via archive mode (Requires wget and unzip):**
+**To setup via archive mode (requires wget and unzip):**
 ```
-branch="master" \
+mode="archive" \
+&& branch="master" \
 && wget "https://raw.githubusercontent.com/naankari/n-bash/$branch/setup.sh" -O /tmp/nbash-setup.sh \
-&& /bin/bash /tmp/nbash-setup.sh $branch "archive"\
+&& /bin/bash /tmp/nbash-setup.sh "$branch" "$mode" \
 && rm -rf /tmp/nbash-setup.sh
 ```
 

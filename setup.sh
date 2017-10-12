@@ -1,5 +1,5 @@
 #!/bin/bash
-
+set -e
 
 branch=${1-master}
 mode=${2-git}

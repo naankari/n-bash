@@ -80,5 +80,3 @@ echo "#################### TILL HERE ####################"
 cd $cwd
 echo -e "\n\nnBash setup completed."
 
-
-

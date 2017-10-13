@@ -1,0 +1,6 @@
+#This file conatains locations that will be added to beginning of the PATH one by one.
+#Comment out a line that should not be added to PATH.
+
+~/bin
+#SkipThis
+

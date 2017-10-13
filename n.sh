@@ -17,9 +17,6 @@
 #       N_OPTIONS_DIR
 #           Required: False
 #           Default Value: "$N_HOME/options"
-#       N_TEMPLATES_DIR
-#           Required: False
-#           Default Value: "$N_HOME/templates"
 #       N_DEFAULTS_DIR
 #           Required: False
 #           Default Value: "$N_HOME/defaults"
@@ -38,7 +35,6 @@ export N_CONFIG_DIR="${N_CONFIG_DIR-$HOME/.nconfig}"
 export N_LIB="${N_LIB-$N_HOME/lib}"
 export N_MODULES_DIR="${N_MODULES_DIR-$N_HOME/modules}"
 export N_OPTIONS_DIR="${N_OPTIONS_DIR-$N_HOME/options}"
-export N_TEMPLATES_DIR="${N_TEMPLATES_DIR-$N_HOME/templates}"
 export N_DEFAULTS_DIR="${N_DEFAULTS_DIR-$N_HOME/defaults}"
 
 source "$N_LIB/lib.sh"
@@ -62,7 +58,7 @@ _nInitInternal() {
     if [[ $interactive != *i* ]]; then
         # Shell is non-interactive. Stop.
         return
-    fi    
+    fi
 
     local logLevel=$(_nToLower "$N_LOG_LEVEL")
     if [[ "$logLevel" != "verbose" && "$logLevel" != "warn" && "$logLevel" != "error" ]]; then
@@ -92,9 +88,9 @@ _nInitInternal() {
 
 _nLoadModules() {
     if [[ ! -f $_nModulesEnabledFile ]]; then
-        _nWarn "Could not read enabled modules file $_nModulesEnabledFile."
+        _nWarn "Could not read enabled modules file $_nModulesEnabledFile!"
         if [[ -f $_nModulesEnalbedFileDefault ]]; then
-            _nLog "Copying from default file $_nModulesEnalbedFileDefault ..."            
+            _nLog "Copying from default file $_nModulesEnalbedFileDefault ..."
             _nEnsureParentDirectoryExists "$_nModulesEnabledFile"
             cp "$_nModulesEnalbedFileDefault" "$_nModulesEnabledFile"
         else

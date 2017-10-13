@@ -1,0 +1,7 @@
+#This file contains all available sound output channels.
+#Comment out a channel if needs to be ignored.
+
+Front
+Headphone
+#SkipThis
+

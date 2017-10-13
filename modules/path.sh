@@ -4,7 +4,7 @@
 # Environment
 #   N_CONFIG_DIR
 #        Required: True
-#   N_TEMPLATES_DIR
+#   N_DEFAULTS_DIR
 #       Required: True
 #    N_PATH_SOURCE_FILE
 #        Required: False
@@ -14,7 +14,7 @@
 #        Default Value: "path"
 
 _npathSourceFile="$(_nAbsolutePath "${N_PATH_SOURCE_FILE-$N_CONFIG_DIR/path}")"
-_npathSourceFileTemplate="$(_nAbsolutePath "$N_TEMPLATES_DIR/path")"
+_npathSourceFileDefault="$(_nAbsolutePath "$N_DEFAULTS_DIR/path")"
 _npathExportAs="${N_PATH_EXPORT_AS-path}"
 
 _npathInit() {
@@ -41,6 +41,33 @@ _npathInit() {
     _nLog "Sourcing path info done."
 }
 
+_npathTryToCreatePathFileIfDoesNotExist() {
+    if [[ -f $_npathSourceFile ]]; then
+        return
+    fi
+
+    echo "Did not find file $_npathSourceFile!"
+    echo "Enter 'y' or 'yes' to create one and continue:"
+    read input
+    input=$(_nToLower "$input")
+    if [[ "$input" != "y" && "$input" != "yes" ]]; then
+        echo "Exiting."
+        return
+    fi
+
+    _nEnsureParentDirectoryExists "$_npathSourceFile"
+
+    if [[ ! -f $_npathSourceFileDefault ]]; then
+        echo "Default file $_npathSourceFileDefault does not exist. Creating empty file."
+        echo "" > "$_npathSourceFile"
+    else
+        echo "Copying from default file $_npathSourceFileDefault ..."
+        cp "$_npathSourceFileDefault" "$_npathSourceFile"
+    fi
+
+    echo "Created file $_npathSourceFile to source path information."
+}
+
 _npathAppendPath() {
     local path="$1"
 
@@ -51,12 +78,12 @@ _npathAppendPath() {
     path=$(_nAbsolutePath "$path")
 
     echo "Adding $path in PATH ..."
-    echo "Enter 'y' or 'yes' to confirm:"
+    echo "Enter 'n' or 'no' to cancel:"
 
     local input
     read input
     input=$(_nToLower "$input")
-    if [[ "$input" != "y" && "$input" != "yes" ]]; then
+    if [[ "$input" == "n" || "$input" == "no" ]]; then
         echo "Exiting."
         return
     fi
@@ -65,29 +92,29 @@ _npathAppendPath() {
 
     echo "Saving new path entry $path in source file $_npathSourceFile ..."
 
+    echo "Enter 'n' or 'no' to cancel:"
+    local input
+    read input
+    input=$(_nToLower "$input")
+    if [[ "$input" == "n" || "$input" == "no" ]]; then
+        echo "Exiting."
+        return
+    fi
+
+    _npathTryToCreatePathFileIfDoesNotExist
+
     if [[ ! -f $_npathSourceFile ]]; then
-        echo "Did not find file $_npathSourceFile!"
-        echo "Enter 'y' or 'yes' to create one and continue:"
-        read input
-        input=$(_nToLower "$input")
-        if [[ "$input" == "y" || "$input" == "yes" ]]; then
-            _nEnsureParentDirectoryExists "$_npathSourceFile"
-            cp "$_npathSourceFileTemplate" "$_npathSourceFile"
-            echo "Created file $_npathSourceFile to source path information."
-        else
-            echo "Exiting."
-            return
-        fi
-    else
-        exits=$(cat "$_npathSourceFile" | grep -i "^$path$" | wc -l)
-        if [[ $exits -gt 0 ]]; then
-            echo "$path already exists in source file $_npathSourceFile."
-            return
-        fi
+        return
+    fi
+
+    exits=$(cat "$_npathSourceFile" | grep -i "^$path$" | wc -l)
+    if [[ $exits -gt 0 ]]; then
+        echo "$path already exists in source file."
+        return
     fi
 
     echo "$path" >> "$_npathSourceFile"
-    echo "Saved path entry."
+    echo "Saved path entry in source file."
 }
 
 _npathPrintUsage() {

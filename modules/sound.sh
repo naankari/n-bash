@@ -11,76 +11,134 @@
 #        Required: False
 #        Default Value: "sound"
 
-_nsoundCurrentOutputChannelFile="$(_nAbsolutePath "${N_SOUND_CURRENT_CHANNEL_OUTPUT_FILE-$N_CONFIG_DIR/sound-current-output-channel}")"
+_nsoundCurrentOutputChannelFile="$(_nAbsolutePath "${N_SOUND_CURRENT_OUTPUT_CHANNEL_FILE-$N_CONFIG_DIR/sound-current-output-channel}")"
+_nsoundAvailableOutputChannelsFile="$(_nAbsolutePath "${N_SOUND_AVAILABLE_OUTPUT_CHANNELS_FILE-$N_CONFIG_DIR/sound-available-output-channels}")"
+_nsoundAvailableOutputChannelsFileDefault="$(_nAbsolutePath "$N_DEFAULTS_DIR/sound-available-output-channels")"
 _nsoundExportAs="${N_SOUND_EXPORT_AS-sound}"
 
-_nsoundSpeakers() {
-    _nLogOrEcho "Setting sound output channel to speakers ..."
+_nsoundAvailableOutputChannels=()
 
-    amixer set Headphone 0
-    amixer set Front 100
+_nsoundIsOutputChannelInList() {
+    local outputChannel="$1"
 
-    _nEnsureParentDirectoryExists "$_nsoundCurrentOutputChannelFile"
-    echo "speakers" > "$_nsoundCurrentOutputChannelFile"
+    for availableOutputChannel in "${_nsoundAvailableOutputChannels[@]}"; do
+        if [[ "$availableOutputChannel" == "$outputChannel" ]]; then
+            echo "yes"
+            break
+        fi
+    done
 }
 
-_nsoundHeadphones() {
-    _nLogOrEcho "Setting sound output channel to headphones ..."
+_nsoundSetOutputChannel() {
+    local outputChannel="$1"
+    local amixerOptions="$2"
 
-    amixer set Front 0
-    amixer set Headphone 100
+    _nLogOrEcho "Setting sound output channel to $outputChannel ..."
 
-    _nEnsureParentDirectoryExists "$_nsoundCurrentOutputChannelFile"
-    echo "headphones" > "$_nsoundCurrentOutputChannelFile"
+    local isOutputChannelInList="$(_nsoundIsOutputChannelInList "$outputChannel")"
+    if [[ "$isOutputChannelInList" != "yes" ]]; then
+        _nErrorOrEcho "Could not find matching channel!"
+        return 1
+    fi
+
+    local returnStatus=0
+    for availableOutputChannel in "${_nsoundAvailableOutputChannels[@]}"; do
+        if [[ "$availableOutputChannel" == "$outputChannel" ]]; then
+            amixer $amixerOptions set "$availableOutputChannel" 100
+            returnStatus=$(expr $returnStatus + $?)
+        else
+            amixer $amixerOptions set "$availableOutputChannel" 0
+            returnStatus=$(expr $returnStatus + $?)
+        fi
+        _nEnsureParentDirectoryExists "$_nsoundCurrentOutputChannelFile"
+        echo "$outputChannel" > "$_nsoundCurrentOutputChannelFile"
+    done
+
+    if [[ $returnStatus -ne 0 ]]; then
+        _nErrorOrEcho "Some error has occurred with amixer! Maybe wrong channel name!"
+    fi
+    return $returnStatus
 }
-
-_nsoundInit() {
-    local currentOutputChannel="$(_nsoundCurrentOutputChannel)"
-
-    if [[ "$currentOutputChannel" == "speakers" ]]; then
-        _nsoundSpeakers
-        return $?
-    fi
-
-    if [[ "$currentOutputChannel" == "headphones" ]]; then
-        _nsoundHeadphones
-        return $?
-    fi
-
-    if [[ "$currentOutputChannel" != "" ]]; then
-        _nWarn "Could not set output to unknown channel $currentOutputChannel!"
-        return
-    fi
-}
-
-_nsoundToggleOutputChannel() {
-    local currentOutputChannel="$(_nsoundCurrentOutputChannel)"
-
-    if [[ "$currentOutputChannel" == "speakers" ]]; then
-        _nsoundHeadphones
-        return $?
-    fi
-    if [[ "$currentOutputChannel" == "headphones" ]]; then
-        _nsoundSpeakers
-        return $?
-    fi
-    _nsoundHeadphones
-}
-
 _nsoundCurrentOutputChannel() {
     if [[ ! -f "$_nsoundCurrentOutputChannelFile" ]]; then
         return 
     fi
 
     local currentOutputChannel=$(cat "$_nsoundCurrentOutputChannelFile")
-    if [[ "$currentOutputChannel" == "speakers" ]]; then
-        echo "speakers"
+    echo "$currentOutputChannel"
+}
+
+_nsoundInit() {
+    if [[ ! -f $_nsoundAvailableOutputChannelsFile ]]; then
+        _nWarn "Could not read available sound output channels file $_nsoundAvailableOutputChannelsFile!"
+        if [[ -f $_nsoundAvailableOutputChannelsFileDefault ]]; then
+            _nLog "Copying from default file $_nsoundAvailableOutputChannelsFileDefault ..."
+
+            _nEnsureParentDirectoryExists "$_nsoundAvailableOutputChannelsFile"
+            cp "$_nsoundAvailableOutputChannelsFileDefault" "$_nsoundAvailableOutputChannelsFile"
+        fi
+    fi
+
+    local availableOutputChannels="$(_nReadEffectiveLines "$_nsoundAvailableOutputChannelsFile")"
+    for availableOutputChannel in $availableOutputChannels; do
+        _nsoundAvailableOutputChannels+=("$availableOutputChannel")
+    done
+
+    if [[ "$availableOutputChannels" != "" ]]; then
+        _nLog "Found available sound channels: ${_nsoundAvailableOutputChannels[*]}."
+    else
+        _nWarn "Did not find any available sound channels!"
+    fi
+    _nLog "Modify file $_nsoundAvailableOutputChannelsFile to correct available sound channels."
+
+    if [[ ! -f "$_nsoundCurrentOutputChannelFile" ]]; then
+        _nLog "Did not find current sound output channel file $_nsoundCurrentOutputChannelFile. Skipping setting output channel."
+        return 
+    fi
+
+    local currentOutputChannel="$(_nsoundCurrentOutputChannel)"
+    if [[ "$currentOutputChannel" == "" ]]; then
         return
     fi
-    if [[ "$currentOutputChannel" == "headphones" ]]; then
-        echo "headphones"
+
+    _nsoundSetOutputChannel "$currentOutputChannel" "-q"
+    return $?
+}
+
+_nsoundFindNextOutputChannel() {
+    local currentOutputChannel="$(_nsoundCurrentOutputChannel)"
+    local firstOutputChannel="${_nsoundAvailableOutputChannels[0]}"
+
+    if [[ "$currentOutputChannel" == "" ]]; then
+        echo "$firstOutputChannel"
         return
     fi
+
+    local matchFound=false
+    for availableOutputChannel in "${_nsoundAvailableOutputChannels[@]}"; do
+        if [[ "$matchFound" == true ]]; then
+            echo "$availableOutputChannel"
+            return
+        fi
+
+        if [[ "$availableOutputChannel" == "$currentOutputChannel" ]]; then
+            matchFound=true
+        fi
+    done
+
+    echo "$firstOutputChannel"
+    return
+}
+
+_nsoundToggleOutputChannel() {
+    local nextOutputChannel="$(_nsoundFindNextOutputChannel)"
+
+    if [[ "$nextOutputChannel" == "" ]]; then
+        return
+    fi
+
+    _nsoundSetOutputChannel "$nextOutputChannel"
+    return $?
 }
 
 _nsoundUsage() {
@@ -89,15 +147,13 @@ _nsoundUsage() {
     echo "    Settings for the sound."
     echo "[Options]"
     echo "    toggle"
-    echo "        Toggle the sound output channel between speakers and headphones."
-    echo "    speakers"
-    echo "        Set sound output channel to speakers."
-    echo "    headphones"
-    echo "        Set sound output channel to headphones."
+    echo "        Toggles the sound output channel between available channels."
+    echo "    <channel>"
+    echo "        Sets sound output channel to provided channel."
     echo "    --current"
-    echo "        Display current output channel."
+    echo "        Displays current output channel."
     echo "    -?"
-    echo "        Show this message."
+    echo "        Shows this message."
 }
 
 _nsound() {
@@ -113,18 +169,13 @@ _nsound() {
         return $?
     fi
 
-    if [[ "$input" == "speakers" ]]; then
-        _nsoundSpeakers
-        return $?
-    fi
-
-    if [[ "$input" == "headphones" ]]; then
-        _nsoundHeadphones
-        return $?
-    fi
-
     if [[ "$input" == "-?" ]]; then
         _nsoundUsage
+        return $?
+    fi
+
+    if [[ "$input" != "" ]]; then
+        _nsoundSetOutputChannel "$input"
         return $?
     fi
 
@@ -137,6 +188,6 @@ _nsoundInit
 
 alias $_nsoundExportAs="_nsound"
 
-_nLog "Use '$_nsoundExportAs speakers|headphones' to toggle between speakers and headphones."
+_nLog "Use '$_nsoundExportAs toggle' to toggle between available channels."
 _nLog "Use '$_nsoundExportAs -?' to know more about this command."
 

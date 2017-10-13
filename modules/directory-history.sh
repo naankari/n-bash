@@ -32,7 +32,7 @@ _ndhInit() {
 }
 
 _ndhPrintHistory() {
-    local count="${#_ndhHistory[@]}"
+    local count=${#_ndhHistory[@]}
     if [[ $count -eq 0 ]]; then
         echo "Directory history is empty."
         return

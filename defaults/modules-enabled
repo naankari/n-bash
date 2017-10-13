@@ -1,11 +1,11 @@
 #This file lists all enabled modules.
 #Comment out a module name if it should not be loaded.
-#This file should be kept in $N_HOME directory.
 
 profile
 path
 directory-history
 prompt
 easy
-sound
+#sound
+#SkipThis
 

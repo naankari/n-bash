@@ -1,4 +1,4 @@
 #This file contains the host name which will be displayed in the prompt.
-#This file should be kept in $N_HOME directory.
 
 MY_HOST
+

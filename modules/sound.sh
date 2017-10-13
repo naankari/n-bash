@@ -81,7 +81,6 @@ _nsoundCurrentOutputChannel() {
         echo "headphones"
         return
     fi
-
 }
 
 _nsoundUsage() {
@@ -98,7 +97,7 @@ _nsoundUsage() {
     echo "    --current"
     echo "        Display current output channel."
     echo "    -?"
-    echo "        Show this message"
+    echo "        Show this message."
 }
 
 _nsound() {
@@ -133,6 +132,8 @@ _nsound() {
     _nsoundUsage
     return 1
 }
+
+_nsoundInit
 
 alias $_nsoundExportAs="_nsound"
 

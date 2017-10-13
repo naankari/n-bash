@@ -57,7 +57,6 @@ else
     return
 fi
 
-
 echo "Setting up nBash ..."
 echo -e "\n\nCreating master switch file to turn on/off nBash?"
 echo "Enter 'n' or 'no' to skip:"
@@ -67,7 +66,7 @@ if [[ $input = "n" || $input = "no" ]]; then
     echo "However you can later create the file $masterSwitchFile with content 'off'. This will turn off nBash."
 else
     echo "on" > "$masterSwitchFile"
-    echo "Created mster switch file $masterSwitchFile. To turn off nBash, set the content of the file to 'off'."
+    echo "Created master switch file $masterSwitchFile. To turn off nBash, set the content of the file to 'off'."
 fi
 
 echo -e "\n\nWrite following lines to your profile:"
@@ -78,7 +77,8 @@ echo "export N_HOME=\"$nHome\""
 echo "source \"\$N_HOME/n.sh\""
 echo "#################### TILL HERE ####################"
 
-echo -e "\n\nnBash setup completed."
 cd $cwd
+echo -e "\n\nnBash setup completed."
+
 
 

@@ -36,10 +36,10 @@ _nProfileInvokeFn() {
         if [[ $retVal -eq 0 ]]; then
             _nLogOrEcho "Function invoked successfully."
         else
-            _nErrorOrEcho "Function failed with errors."
+            _nErrorOrEcho "Function failed with errors!"
         fi
     else
-        _nWarnOrEcho "Function $fn does not exist."
+        _nWarnOrEcho "Function $fn does not exist!"
     fi
 }
 
@@ -47,7 +47,7 @@ _nprofileInvokeSetup() {
     local profile="$1"
     local profileFile="$_nprofileExecutableFilePrefix$profile"
     if [[ ! -f $profileFile ]]; then
-        _nWarnOrEcho "Source file $profileFile does not exist."
+        _nWarnOrEcho "Source file $profileFile does not exist!"
     else
         _nLogOrEcho "Sourcing file $profileFile ..."
         _nLogOrEcho "----- SOURCE BEGIN -----"

@@ -102,7 +102,7 @@ _npathPrintUsage() {
     echo "    <blank>"
     echo "        Add current directory to the PATH environment."
     echo "    -?"
-    echo "        Show this message"
+    echo "        Show this message."
 }
 
 _npath() {
@@ -123,5 +123,4 @@ alias $_npathExportAs="_npath"
 
 _nLog "Use '$_npathExportAs .|<directory name>' to add the current or specific directory to the path."
 _nLog "Use '$_npathExportAs -?' to know more about this command."
-
 

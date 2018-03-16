@@ -37,7 +37,6 @@ _nLogOrEcho() {
     fi
 
     _nLog "$1"
-    return $?
 }
 
 _nWarnOrEcho() {
@@ -47,7 +46,6 @@ _nWarnOrEcho() {
     fi
 
     _nWarn "$1"
-    return $?
 }
 
 _nErrorOrEcho() {
@@ -55,16 +53,19 @@ _nErrorOrEcho() {
         echo "[ERROR] $1"
         return
     fi
+
     _nError "$1"
-    return $?
 }
 
 _nSourceIf() {
    local path=$(_nIndirect "$1")
     if [[ -f $path ]]; then
+        _nLogOrEcho "Sourcing from file $path ..."
+        _nLogOrEcho "----- SOURCE BEGIN ----"
         source $path
+        _nLogOrEcho "----- SOURCE END -----"
     else
-        _nError "File $path could not be sourced!"
+        _nWarnOrEcho "File $path could not be sourced as it does not exist!"
     fi
 }
 

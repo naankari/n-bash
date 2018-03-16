@@ -46,14 +46,8 @@ _nProfileInvokeFn() {
 _nprofileInvokeSetup() {
     local profile="$1"
     local profileFile="$_nprofileExecutableFilePrefix$profile"
-    if [[ ! -f $profileFile ]]; then
-        _nWarnOrEcho "Source file $profileFile does not exist!"
-    else
-        _nLogOrEcho "Sourcing file $profileFile ..."
-        _nLogOrEcho "----- SOURCE BEGIN -----"
-        source "$profileFile"
-        _nLogOrEcho "----- SOURCE END -----"
-    fi
+
+    _nSourceIf "$profileFile"
     _nProfileInvokeFn "$_nprofileSetupFnPrefix$profile"
 }
 
@@ -86,13 +80,13 @@ _nprofileInvokeTeardown() {
 
 _nprofileUnload() {
     local profile="$1"
-    _nLog "Unloading profile $profile ..."
+    _nLogOrEcho "Unloading profile $profile ..."
     _nprofileInvokeTeardown "$profile"
     if [[ $profile != "default" ]]; then
         _nprofileInvokeTeardown "default"
     fi
     unset N_PROFILE
-    _nLog "Profile unloading done."
+    _nLogOrEcho "Profile unloading done."
 }
 
 _nprofileCurrent() {

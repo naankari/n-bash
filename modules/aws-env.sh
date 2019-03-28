@@ -4,20 +4,36 @@
 # Environment
 #   N_CONFIG_DIR
 #        Required: True
-#   N_AWS_ENV_KEYS_FILE_PREFIX
+#   N_AWS_ENV_CREDENTIALS_FILE_PREFIX
 #       Required: False
-#       Default Value: "$N_CONFIG_DIR/aws-env-keys"
-#   N_AWS_ENV_ACCOUNT_FILE_PREFIX
+#       Default Value: "$N_CONFIG_DIR/aws-env-credentials"
+#   N_AWS_ENV_PROFILE_FILE_PREFIX
 #       Required: False
-#       Default Value: "$N_CONFIG_DIR/aws-env-account"
+#       Default Value: "$N_CONFIG_DIR/aws-env-profile"
 #    N_AWS_ENV_EXPORT_AS
 #        Required: False
 #        Default Value: "awsEnv"
 
 
-_nawsEnvKeysFilePrefix="$(_nAbsolutePath "${N_AWS_ENV_KEYS_FILE_PREFIX-$N_CONFIG_DIR/aws-env-keys-}")"
-_nawsEnvAccountFilePrefix="$(_nAbsolutePath "${N_AWS_ENV_ACCOUNT_FILE_PREFIX-$N_CONFIG_DIR/aws-env-account-}")"
+_nawsEnvCredentialsFilePrefix="$(_nAbsolutePath "${N_AWS_ENV_CREDENTIALS_FILE_PREFIX-$N_CONFIG_DIR/aws-env-credentials-}")"
+_nawsEnvProfileFilePrefix="$(_nAbsolutePath "${N_AWS_ENV_PROFILE_FILE_PREFIX-$N_CONFIG_DIR/aws-env-profile-}")"
 _nawsEnvExportAs="${N_AWS_ENV_EXPORT_AS-awsEnv}"
+
+_nCredentialsFilePropertyNames=("aws_access_key_id" "aws_secret_access_key" "aws_session_token")
+_nProfileFilePropertyNames=("aws_account_number" "aws_account_type" "aws_default_region" "aws_vpc_name" "aws_key_pair_name")
+
+_nExportProperties() {
+    local propertyNames=("$@")
+
+    for propertyName in "${propertyNames[@]}"; do
+        local envVariableName="$(_nToUpper "$propertyName")"
+        local value="${!propertyName}"
+
+        export $envVariableName="$value"
+
+        _nLogOrEcho "$envVariableName=$value"
+    done
+}
 
 _nawsEnvLoad() {
     local env="$1"
@@ -26,21 +42,37 @@ _nawsEnvLoad() {
         env="default"
     fi
 
-    local keysFile="$_nawsEnvKeysFilePrefix$env"
-    local accountFile="$_nawsEnvAccountFilePrefix$env"
+    local credentialsFile="$_nawsEnvCredentialsFilePrefix$env"
+    local profileFile="$_nawsEnvProfileFilePrefix$env"
 
-    _nSourceIf "$keysFile"
-    _nSourceIf "$accountFile"
+    _nSourceIf "$credentialsFile"
+    _nSourceIf "$profileFile"
 
-    export AWS_ACCESS_KEY_ID="$aws_access_key_id"
-    export AWS_SECRET_ACCESS_KEY="$aws_secret_access_key"
-    export AWS_SESSION_TOKEN="$aws_session_token"
-    export AWS_ACCCUNT_NUMBER="$aws_account_number"
+    _nExportProperties "${_nCredentialsFilePropertyNames[@]}"
+    _nExportProperties "${_nProfileFilePropertyNames[@]}"
+}
 
-    _nLogOrEcho "AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID"
-    _nLogOrEcho "AWS_SECRET_ACCESS_KEY=<hidden>"
-    _nLogOrEcho "AWS_SESSION_TOKEN=<hidden>"
-    _nLogOrEcho "AWS_ACCCUNT_NUMBER=$AWS_ACCCUNT_NUMBER"
+_nawsCopyCredentials() {
+    local env="$1"
+    local file="$2"
+
+    if [[ ! -f $file ]]; then
+        _nErrorOrEcho "Did not find $file to import."
+        return 1
+    fi
+
+    local sourcePath="$(_nAbsolutePath "$file")"
+
+    if [[ ! -f $sourcePath ]]; then
+        _nErrorOrEcho "Did not find $file to import."
+        return 1
+    fi
+
+    local destinationPath="$_nawsEnvCredentialsFilePrefix$env"
+
+    cp "$sourcePath" "$destinationPath"
+
+    _nLogOrEcho "Successfully copied credentials file $sourcePath to $destinationPath"
 }
 
 _nawsEnvPrintUsage() {
@@ -48,26 +80,37 @@ _nawsEnvPrintUsage() {
     echo "$_nawsEnvExportAs"
     echo "    Load aws environment."
     echo "[Options]"
-    echo "    <environment>"
+    echo "    load <environment>"
     echo "        Load provided environment."
+    echo "    copyCredentials <environment> <file>"
+    echo "        Copy credentials file for given environment"
     echo "    -?"
     echo "        Show this message."
 }
 
 _nawsEnv() {
-    local input="$1"
+    local action="$1"
 
-    if [[ "$input" == "-?" ]]; then
+    if [[ "$action" == "-?" ]]; then
         _nawsEnvPrintUsage
         return $?
     fi
 
-    _nawsEnvLoad "$input"
-    return $?
+    if [[ "$action" == "load" ]]; then
+        _nawsEnvLoad "$2"
+        return $?
+    fi
+
+    if [[ "$action" == "copyCredentials" ]]; then
+        _nawsCopyCredentials "$2" "$3"
+        return $?
+    fi
+
+    _nawsEnvPrintUsage
+    return 1
 }
 
 alias $_nawsEnvExportAs="_nawsEnv"
 
 _nLog "Use '$_nawsEnvExportAs <env> to load aws environment."
 _nLog "Use '$_nawsEnvExportAs -?' to know more about this command."
-

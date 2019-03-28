@@ -31,9 +31,8 @@ _npathInit() {
 
     export _N_PATH_ORIG="$PATH"
 
-    paths=$(_nReadEffectiveLines "$_npathSourceFile")
-    for path in $paths; do
-        PATH="$path:$PATH"
+    for aPath in `_nReadEffectivePaths "$_npathSourceFile"`; do
+        PATH="$aPath:$PATH"
     done
 
     export PATH
@@ -48,8 +47,9 @@ _npathTryToCreatePathFileIfDoesNotExist() {
 
     echo "Did not find file $_npathSourceFile!"
     echo "Enter 'y' or 'yes' to create one and continue:"
+    local input
     read input
-    input=$(_nToLower "$input")
+    input="$(_nToLower "$input")"
     if [[ "$input" != "y" && "$input" != "yes" ]]; then
         echo "Exiting."
         return
@@ -69,15 +69,15 @@ _npathTryToCreatePathFileIfDoesNotExist() {
 }
 
 _npathAppendPath() {
-    local path="$1"
+    local aPath="$1"
 
-    if [[ "$path" == "" ]]; then
-        path="."
+    if [[ "$aPath" == "" ]]; then
+       aPath="."
     fi
 
-    path=$(_nAbsolutePath "$path")
+    aPath=$(_nAbsolutePath "$aPath")
 
-    echo "Adding $path in PATH ..."
+    echo "Adding $aPath in PATH ..."
     echo "Enter 'n' or 'no' to cancel:"
 
     local input
@@ -88,12 +88,11 @@ _npathAppendPath() {
         return
     fi
 
-    export PATH="$path:$PATH"
+    export PATH="$aPath:$PATH"
 
-    echo "Saving new path entry $path in source file $_npathSourceFile ..."
+    echo "Saving new path entry $aPath in source file $_npathSourceFile ..."
 
     echo "Enter 'n' or 'no' to cancel:"
-    local input
     read input
     input=$(_nToLower "$input")
     if [[ "$input" == "n" || "$input" == "no" ]]; then
@@ -107,13 +106,13 @@ _npathAppendPath() {
         return
     fi
 
-    exits=$(cat "$_npathSourceFile" | grep -i "^$path$" | wc -l)
+    exits=$(cat "$_npathSourceFile" | grep -i "^$aPath$" | wc -l)
     if [[ $exits -gt 0 ]]; then
-        echo "$path already exists in source file."
+        echo "$aPath already exists in source file."
         return
     fi
 
-    echo "$path" >> "$_npathSourceFile"
+    echo "$aPath" >> "$_npathSourceFile"
     echo "Saved path entry in source file."
 }
 
@@ -150,4 +149,3 @@ alias $_npathExportAs="_npath"
 
 _nLog "Use '$_npathExportAs .|<directory name>' to add the current or specific directory to the path."
 _nLog "Use '$_npathExportAs -?' to know more about this command."
-

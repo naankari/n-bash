@@ -61,7 +61,7 @@ _nsoundSetOutputChannel() {
 }
 _nsoundCurrentOutputChannel() {
     if [[ ! -f "$_nsoundCurrentOutputChannelFile" ]]; then
-        return 
+        return
     fi
 
     local currentOutputChannel=$(cat "$_nsoundCurrentOutputChannelFile")
@@ -79,8 +79,7 @@ _nsoundInit() {
         fi
     fi
 
-    local availableOutputChannels="$(_nReadEffectiveLines "$_nsoundAvailableOutputChannelsFile")"
-    for availableOutputChannel in $availableOutputChannels; do
+    for availableOutputChannel in `$(_nReadEffectiveLines "$_nsoundAvailableOutputChannelsFile")`; do
         _nsoundAvailableOutputChannels+=("$availableOutputChannel")
     done
 
@@ -93,7 +92,7 @@ _nsoundInit() {
 
     if [[ ! -f "$_nsoundCurrentOutputChannelFile" ]]; then
         _nLog "Did not find current sound output channel file $_nsoundCurrentOutputChannelFile. Skipping setting output channel."
-        return 
+        return
     fi
 
     local currentOutputChannel="$(_nsoundCurrentOutputChannel)"
@@ -190,4 +189,3 @@ alias $_nsoundExportAs="_nsound"
 
 _nLog "Use '$_nsoundExportAs toggle' to toggle between available channels."
 _nLog "Use '$_nsoundExportAs -?' to know more about this command."
-

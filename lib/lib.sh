@@ -58,45 +58,45 @@ _nErrorOrEcho() {
 }
 
 _nSourceIf() {
-   local path=$(_nIndirect "$1")
-    if [[ -f $path ]]; then
-        _nLogOrEcho "Sourcing from file $path ..."
+   local aPath=$(_nIndirect "$1")
+    if [[ -f $aPath ]]; then
+        _nLogOrEcho "Sourcing from file $aPath ..."
         _nLogOrEcho "----- SOURCE BEGIN ----"
-        source $path
+        source $aPath
         _nLogOrEcho "----- SOURCE END -----"
     else
-        _nWarnOrEcho "File $path could not be sourced as it does not exist!"
+        _nWarnOrEcho "File $aPath could not be sourced as it does not exist!"
     fi
 }
 
 _nIndirect() {
-    local path="$1"
-    path=${path/\~/$HOME}
-    eval "path=\"$path\""
-    echo "$path"
+    local aPath="$1"
+    aPath=${aPath/\~/$HOME}
+    eval "aPath=\"$aPath\""
+    echo "$aPath"
 }
 
 _nAbsolutePath() {
-    local path="$1"
+    local aPath="$1"
 
-    if [[ "$path" == "" ]]; then
+    if [[ "$aPath" == "" ]]; then
         return
     fi
 
-    path=$(_nIndirect "$path")
+    aPath=$(_nIndirect "$aPath")
 
-    if [[ "$path" == "." ]]; then
-        path="./"
+    if [[ "$aPath" == "." ]]; then
+        aPath="./"
     fi
 
     local cwd="$PWD/"
-    path=${path/\.\//$cwd}
+    aPath=${aPath/\.\//$cwd}
 
-    if [[ "$path" != /* ]]; then
-        path="$cwd$path"
+    if [[ "$aPath" != /* ]]; then
+        aPath="$cwd$aPath"
     fi
 
-    echo "$path"
+    echo "$aPath"
 }
 
 _nEnsureDirectoryExists() {
@@ -109,27 +109,29 @@ _nEnsureParentDirectoryExists() {
 }
 
 _nReadEffectiveLines() {
-    local path=$(_nIndirect "$1")
-    if [[ ! -f $path ]]; then
+    local aPath=$(_nIndirect "$1")
+    if [[ ! -f $aPath ]]; then
         echo ""
         return
     fi
-    local lines=$(cat "$path" | sed -e 's/^\s*//;s/\s*$//' | grep -iv "^[ \t]*$" | grep -iv "^[ \t]*#.*$")
-    for line in $lines; do
+    local lines=$(cat "$aPath" | sed -e 's/^\s*//;s/\s*$//' | grep -iv "^[ \t]*$" | grep -iv "^[ \t]*#.*$")
+    echo $lines
+}
+
+_nReadEffectiveLine() {
+    local lines=$(_nReadEffectiveLines "$1")
+    lines=$(echo "$lines" | head -1)
+    echo "$lines"
+}
+
+_nReadEffectivePaths() {
+    for line in `_nReadEffectiveLines "$1"`; do
         _nIndirect "$line"
     done
 }
 
-_nReadEffectiveLine() {
-    local content=$(_nReadEffectiveLines "$1")
-    content=$(echo "$content" | head -1)
-    echo "$content"
-}
-
 _nFindFirstFileThatExists() {
-    local options=$(_nReadEffectiveLines "$1")
-
-    for option in $options; do
+    for option in `_nReadEffectivePaths "$1"`; do
         if [[ -f $option ]]; then
             echo "$option"
             return
@@ -200,4 +202,3 @@ _nTestCaseConversion() {
         _nWarn "Could not convert to uppercase. Case insensitive things may not work!"
     fi
 }
-

@@ -47,10 +47,10 @@ _nInit() {
     export N_LOAD_STAGE="init"
 
     _nInitInternal
-    local status=$?
+    local lastStatus=$?
 
     export N_LOAD_STAGE="runtime"
-    return $status 
+    return $lastStatus
 }
 
 _nInitInternal() {
@@ -100,8 +100,7 @@ _nLoadModules() {
     fi
 
     _nLog "Loading modules from file $_nModulesEnabledFile ..."
-    local modules=$(_nReadEffectiveLines "$_nModulesEnabledFile")
-    for module in $modules; do
+    for module in `_nReadEffectiveLines "$_nModulesEnabledFile"`; do
         _nLog "Loading module $module ..."
         _nSourceIf "$N_MODULES_DIR/$module.sh"
     done
@@ -113,4 +112,3 @@ _nDiagnostics() {
 }
 
 _nInit
-

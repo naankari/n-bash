@@ -57,33 +57,21 @@ _nErrorOrEcho() {
     _nError "$1"
 }
 
-_nSourceIf() {
-   local aPath=$(_nIndirect "$1")
-    if [[ -f $aPath ]]; then
-        _nLogOrEcho "Sourcing from file $aPath ..."
-        _nLogOrEcho "----- SOURCE BEGIN ----"
-        source $aPath
-        _nLogOrEcho "----- SOURCE END -----"
-    else
-        _nWarnOrEcho "File $aPath could not be sourced as it does not exist!"
-    fi
-}
-
-_nIndirect() {
+_nEvaluatePath() {
     local aPath="$1"
     aPath=${aPath/\~/$HOME}
     eval "aPath=\"$aPath\""
     echo "$aPath"
 }
 
-_nAbsolutePath() {
+_nToAbsolutePath() {
     local aPath="$1"
 
     if [[ "$aPath" == "" ]]; then
         return
     fi
 
-    aPath=$(_nIndirect "$aPath")
+    aPath=$(_nEvaluatePath "$aPath")
 
     if [[ "$aPath" == "." ]]; then
         aPath="./"
@@ -108,8 +96,26 @@ _nEnsureParentDirectoryExists() {
     mkdir -p "$(dirname "$filePath")"
 }
 
+_nDoesFileExist() {
+    local aPath="$(_nEvaluatePath "$1")"
+    if [[ -f $aPath ]]; then
+        echo 1
+    else
+        echo 0
+    fi
+}
+
+_nFindFirstFileThatExists() {
+    for option in `_nReadEffectivePaths "$1"`; do
+        if [[ -f $option ]]; then
+            echo "$option"
+            return
+        fi
+    done
+}
+
 _nReadEffectiveLines() {
-    local aPath=$(_nIndirect "$1")
+    local aPath=$(_nEvaluatePath "$1")
     if [[ ! -f $aPath ]]; then
         echo ""
         return
@@ -126,31 +132,8 @@ _nReadEffectiveLine() {
 
 _nReadEffectivePaths() {
     for line in `_nReadEffectiveLines "$1"`; do
-        _nIndirect "$line"
+        _nEvaluatePath "$line"
     done
-}
-
-_nFindFirstFileThatExists() {
-    for option in `_nReadEffectivePaths "$1"`; do
-        if [[ -f $option ]]; then
-            echo "$option"
-            return
-        fi
-    done
-}
-
-_nIsInstalled() {
-    local location=$(type -p "$1")
-    if [[ $location != "" ]]; then
-        echo "yes"
-    fi
-}
-
-_nIsBash4() {
-    local version="$BASH_VERSION"
-    if [[ version == 4.* ]]; then
-        echo "yes"
-    fi
 }
 
 _nToUpper() {
@@ -191,6 +174,64 @@ _nToLower() {
     fi
 
     echo "$value"
+}
+
+_nIndirect() {
+    local name="$1"
+    export currentShell="$(_nGetCurrentShell)"
+    if [[ "$currentShell" == "bash" ]]; then
+       echo "${!name}"
+    elif [[ "$currentShell" == "zsh" ]]; then
+       echo "${(P)name}"
+    else
+       echo ""
+    fi
+}
+
+_nSourceIf() {
+   local aPath=$(_nEvaluatePath "$1")
+    if [[ -f $aPath ]]; then
+        _nLogOrEcho "Sourcing from file $aPath ..."
+        _nLogOrEcho "----- SOURCE BEGIN ----"
+        source $aPath
+        _nLogOrEcho "----- SOURCE END -----"
+    else
+        _nWarnOrEcho "File $aPath could not be sourced as it does not exist!"
+    fi
+}
+
+_nDoesFunctionExist() {
+    declare -f $1 > /dev/null
+    local lastStatus=$?
+    if [[ $lastStatus == 0 ]]; then
+        echo 1
+    else
+        echo 0
+    fi
+}
+
+_nIsInstalled() {
+    local location=$(type -p "$1")
+    if [[ $location != "" ]]; then
+        echo "yes"
+    fi
+}
+
+_nIsBash4() {
+    local version="$BASH_VERSION"
+    if [[ version == 4.* ]]; then
+        echo "yes"
+    fi
+}
+
+_nGetCurrentShell() {
+    if [[ -n "$ZSH_VERSION" ]]; then
+       echo "zsh"
+    elif [[ -n "$BASH_VERSION" ]]; then
+       echo "bash"
+    else
+       echo "unknown"
+    fi
 }
 
 _nLibDiagnostics() {

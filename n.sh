@@ -39,12 +39,13 @@ export N_DEFAULTS_DIR="${N_DEFAULTS_DIR-$N_HOME/defaults}"
 
 source "$N_LIB/lib.sh"
 
-_nMasterSwitchFile="$(_nAbsolutePath "${N_MASTER_SWITCH_FILE-$HOME/n-bash-on-off}")"
-_nModulesEnabledFile="$(_nAbsolutePath "${N_MODULES_ENABLED_FILE-$N_CONFIG_DIR/modules-enabled}")"
-_nModulesEnalbedFileDefault="$(_nAbsolutePath "$N_DEFAULTS_DIR/modules-enabled")"
+_nMasterSwitchFile="$(_nToAbsolutePath "${N_MASTER_SWITCH_FILE-$HOME/n-bash-on-off}")"
+_nModulesEnabledFile="$(_nToAbsolutePath "${N_MODULES_ENABLED_FILE-$N_CONFIG_DIR/modules-enabled}")"
+_nModulesEnalbedFileDefault="$(_nToAbsolutePath "$N_DEFAULTS_DIR/modules-enabled")"
 
 _nInit() {
     export N_LOAD_STAGE="init"
+    export N_CURRENT_SHELL="$(_nGetCurrentShell)"
 
     _nInitInternal
     local lastStatus=$?

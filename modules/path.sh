@@ -13,8 +13,8 @@
 #        Required: False
 #        Default Value: "path"
 
-_npathSourceFile="$(_nAbsolutePath "${N_PATH_SOURCE_FILE-$N_CONFIG_DIR/path}")"
-_npathSourceFileDefault="$(_nAbsolutePath "$N_DEFAULTS_DIR/path")"
+_npathSourceFile="$(_nToAbsolutePath "${N_PATH_SOURCE_FILE-$N_CONFIG_DIR/path}")"
+_npathSourceFileDefault="$(_nToAbsolutePath "$N_DEFAULTS_DIR/path")"
 _npathExportAs="${N_PATH_EXPORT_AS-path}"
 
 _npathInit() {
@@ -75,7 +75,7 @@ _npathAppendPath() {
        aPath="."
     fi
 
-    aPath=$(_nAbsolutePath "$aPath")
+    aPath=$(_nToAbsolutePath "$aPath")
 
     echo "Adding $aPath in PATH ..."
     echo "Enter 'n' or 'no' to cancel:"
@@ -127,14 +127,14 @@ _npathPrintUsage() {
     echo "        Add current directory to the PATH environment."
     echo "    <blank>"
     echo "        Add current directory to the PATH environment."
-    echo "    -?"
+    echo "    -h"
     echo "        Show this message."
 }
 
 _npath() {
     local input="$1"
 
-    if [[ "$input" == "-?" ]]; then
+    if [[ "$input" == "-h" ]]; then
         _npathPrintUsage
         return $?
     fi
@@ -148,4 +148,4 @@ _npathInit
 alias $_npathExportAs="_npath"
 
 _nLog "Use '$_npathExportAs .|<directory name>' to add the current or specific directory to the path."
-_nLog "Use '$_npathExportAs -?' to know more about this command."
+_nLog "Use '$_npathExportAs -h' to know more about this command."

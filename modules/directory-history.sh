@@ -2,6 +2,8 @@
 
 
 # Environment
+#   N_CURRENT_SHELL
+#       Required: True
 #   N_DIR_HISTORY_SIZE
 #       Required: False
 #       Default Value: 10
@@ -14,12 +16,25 @@ _ndhExportAs="${N_DIR_EXPORT_AS-dh}"
 
 _ndhHistory=()
 
+_ndhFixIndex() {
+    local input=$1
+
+    if [[ "$N_CURRENT_SHELL" == "bash" ]]; then
+       echo $input
+    elif [[ "$N_CURRENT_SHELL" == "zsh" ]]; then
+       echo $(expr $input + 1)
+    else
+       echo $(expr $input + 1)
+    fi
+}
+
 _ndhUpdateHistory() {
     local cwd="$PWD"
     local nextValue="$cwd"
     for index in $(seq 0 $(expr $_ndhSize - 1)); do
-        local oldValue="${_ndhHistory[$index]}"
-        _ndhHistory[$index]="$nextValue"
+        local arrayIndex=$(_ndhFixIndex $index)
+        local oldValue="${_ndhHistory[$arrayIndex]}"
+        _ndhHistory[$arrayIndex]="$nextValue"
         if [[ "$oldValue" == "" || "$oldValue" == "$cwd" ]]; then
             break
         fi
@@ -28,7 +43,15 @@ _ndhUpdateHistory() {
 }
 
 _ndhInit() {
-    export PROMPT_COMMAND=_ndhUpdateHistory
+    local currentShell="$N_CURRENT_SHELL"
+    if [[ "$currentShell" == "bash" ]]; then
+        export PROMPT_COMMAND="declare -f _ndhUpdateHistory > /dev/null && _ndhUpdateHistory"
+    elif [[ "$currentShell" == "zsh" ]]; then
+        prmptcmd() {
+            declare -f _ndhUpdateHistory > /dev/null && _ndhUpdateHistory
+        }
+        precmd_functions=(prmptcmd)
+    fi
 }
 
 _ndhPrintHistory() {
@@ -41,7 +64,8 @@ _ndhPrintHistory() {
     echo "Available history:"
 
     for index in $(seq 0 $(expr $_ndhSize - 1)); do
-        local dirName="${_ndhHistory[$index]}"
+        local arrayIndex=$(_ndhFixIndex $index)
+        local dirName="${_ndhHistory[$arrayIndex]}"
         if [[ "$dirName" == "" ]]; then
             break
         fi
@@ -59,11 +83,6 @@ _ndhPrintHistory() {
 }
 
 _ndhGoToIndex() {
-    if [[ $# -ne 1 ]]; then
-        echo "[ERROR] Missing input!"
-        return 1
-    fi
-
     local index="$1"
 
     if ! [[ $index =~ ^[0-9]+$ ]]; then
@@ -76,10 +95,12 @@ _ndhGoToIndex() {
         return 3
     fi
 
-    local dirName="${_ndhHistory[$index]}"
+    local arrayIndex=$(_ndhFixIndex $index)
+    local dirName="${_ndhHistory[$arrayIndex]}"
 
     if [[ "$dirName" == "" ]]; then
         echo "[ERROR] This history record does not exist!"
+        _ndhPrintHistory
         return 3
     fi
 
@@ -120,7 +141,7 @@ _ndhPrintUsage() {
     echo "          Change directory to the given index in history."
     echo "    -i"
     echo "          Show the history alone; do not prompt for the input."
-    echo "    -?"
+    echo "    -h"
     echo "          Show this message."
 }
 
@@ -142,7 +163,7 @@ _ndh() {
         return $?
     fi
 
-    if [[ $input == "-?" ]]; then
+    if [[ $input == "-h" ]]; then
         _ndhPrintUsage
         return $?
     fi
@@ -161,5 +182,4 @@ _ndhInit
 
 alias $_ndhExportAs="_ndh"
 
-_nLog "Use '$_ndhExportAs -?' to know more about directory hostory command."
-
+_nLog "Use '$_ndhExportAs -h' to know more about directory hostory command."

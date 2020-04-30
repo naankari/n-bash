@@ -11,9 +11,9 @@
 #        Required: False
 #        Default Value: "sound"
 
-_nsoundCurrentOutputChannelFile="$(_nAbsolutePath "${N_SOUND_CURRENT_OUTPUT_CHANNEL_FILE-$N_CONFIG_DIR/sound-current-output-channel}")"
-_nsoundAvailableOutputChannelsFile="$(_nAbsolutePath "${N_SOUND_AVAILABLE_OUTPUT_CHANNELS_FILE-$N_CONFIG_DIR/sound-available-output-channels}")"
-_nsoundAvailableOutputChannelsFileDefault="$(_nAbsolutePath "$N_DEFAULTS_DIR/sound-available-output-channels")"
+_nsoundCurrentOutputChannelFile="$(_nToAbsolutePath "${N_SOUND_CURRENT_OUTPUT_CHANNEL_FILE-$N_CONFIG_DIR/sound-current-output-channel}")"
+_nsoundAvailableOutputChannelsFile="$(_nToAbsolutePath "${N_SOUND_AVAILABLE_OUTPUT_CHANNELS_FILE-$N_CONFIG_DIR/sound-available-output-channels}")"
+_nsoundAvailableOutputChannelsFileDefault="$(_nToAbsolutePath "$N_DEFAULTS_DIR/sound-available-output-channels")"
 _nsoundExportAs="${N_SOUND_EXPORT_AS-sound}"
 
 _nsoundAvailableOutputChannels=()
@@ -149,9 +149,9 @@ _nsoundUsage() {
     echo "        Toggles the sound output channel between available channels."
     echo "    <channel>"
     echo "        Sets sound output channel to provided channel."
-    echo "    --current"
+    echo "    -c"
     echo "        Displays current output channel."
-    echo "    -?"
+    echo "    -h"
     echo "        Shows this message."
 }
 
@@ -163,12 +163,12 @@ _nsound() {
         return $?
     fi
 
-    if [[ "$input" == "--current" ]]; then
+    if [[ "$input" == "-c" ]]; then
         _nsoundCurrentOutputChannel
         return $?
     fi
 
-    if [[ "$input" == "-?" ]]; then
+    if [[ "$input" == "-h" ]]; then
         _nsoundUsage
         return $?
     fi
@@ -188,4 +188,4 @@ _nsoundInit
 alias $_nsoundExportAs="_nsound"
 
 _nLog "Use '$_nsoundExportAs toggle' to toggle between available channels."
-_nLog "Use '$_nsoundExportAs -?' to know more about this command."
+_nLog "Use '$_nsoundExportAs -h' to know more about this command."

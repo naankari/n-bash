@@ -2,8 +2,12 @@
 
 
 # Profile
+#    N_CURRENT_SHELL
+#        Required: True
 #    N_CONFIG_DIR
 #        Required: True
+#   N_DEFAULTS_DIR
+#       Required: True
 #    N_PROFILE
 #        Required: False
 #        Default Value: <none>
@@ -20,19 +24,19 @@
 #       Required: False
 #       Default Value: "workOn"
 
-_nprofileExecutableFilePrefix="$(_nAbsolutePath "${N_PROFILE_EXECUTABLE_FILE_PREFIX-$N_CONFIG_DIR/profile-}")"
+_nprofileExecutableFilePrefix="$(_nToAbsolutePath "${N_PROFILE_EXECUTABLE_FILE_PREFIX-$N_CONFIG_DIR/profile-}")"
 _nprofileSetupFnPrefix="${N_PROFILE_SETUP_FN_PREFIX-_setup_profile_}"
 _nprofileTeardownFnPrefix="${N_PROFILE_TEARDOWN_FN_PREFIX-_teardown_profile_}"
 _nprofileExportAs="${N_PROFILE_EXPORT_AS-workOn}"
 
 _nProfileInvokeFn() {
     local fn="$1"
-    if [[ "$(type -t $fn)" == "function" ]]; then
+    if [[ $(_nDoesFunctionExist $fn) == 1 ]]; then
         _nLogOrEcho "Invoking function $fn ..."
-        _nLogOrEcho "----- FUNCTION INVOCATION BEGIN -----"
+        _nLogOrEcho "----- FUNCTION INVOCATION BEGINS -----"
         $fn
         local retVal=$?
-        _nLogOrEcho "----- FUNCTION INVOCATION END -----"
+        _nLogOrEcho "----- FUNCTION INVOCATION ENDS -----"
         if [[ $retVal -eq 0 ]]; then
             _nLogOrEcho "Function invoked successfully."
         else
@@ -43,31 +47,34 @@ _nProfileInvokeFn() {
     fi
 }
 
-_nprofileInvokeSetup() {
+_nprofileLoadIndividualProfile() {
     local profile="$1"
-    local profileFile="$_nprofileExecutableFilePrefix$profile"
+    local profileFile="${_nprofileExecutableFilePrefix}${profile}"
 
-    _nSourceIf "$profileFile"
-    _nProfileInvokeFn "$_nprofileSetupFnPrefix$profile"
+    if [[ $(_nDoesFileExist "$profileFile") == 1 ]]; then
+        _nSourceIf "$profileFile"
+        _nProfileInvokeFn "${_nprofileSetupFnPrefix}${profile}"
+        _nProfileInvokeFn "${_nprofileSetupFnPrefix}${profile}_${N_CURRENT_SHELL}"
+    else
+        _nWarnOrEcho "Profile file '$(_nToAbsolutePath '${profileFile}')' not found. You can copy default file from '$(_nToAbsolutePath '${N_DEFAULTS_DIR}/profile-default')' and rename accordingly!"
+    fi
 }
 
-_nprofileLoad() {
+_nprofileLoadProfile() {
     local profile="$1"
-    if [[ "$profile" == "" ]]; then
-        profile="default"
-    fi
+
     _nLogOrEcho "Setting up $profile profile ..."
     if [[ "$profile" != "default" ]]; then
-        _nprofileInvokeSetup "default"
+        _nprofileLoadIndividualProfile "default"
     fi
-    _nprofileInvokeSetup "$profile"
+    _nprofileLoadIndividualProfile "$profile"
     export N_PROFILE="$profile"
-    _nLogOrEcho "Profile setup done."
+    _nLogOrEcho "Setting up profile done."
 }
 
 _nprofileInit() {
     if [[ "$N_PROFILE" != "" ]]; then
-        _nprofileLoad "$N_PROFILE"
+        _nprofileLoadProfile "$N_PROFILE"
     else
         _nLog "Not loading any profile."
     fi
@@ -75,31 +82,63 @@ _nprofileInit() {
 
 _nprofileInvokeTeardown() {
     local profile="$1"
-    _nProfileInvokeFn "$_nprofileTeardownFnPrefix$profile"
+
+    _nProfileInvokeFn "${_nprofileTeardownFnPrefix}${profile}"
+    _nProfileInvokeFn "${_nprofileTeardownFnPrefix}${profile}_${N_CURRENT_SHELL}"
 }
 
-_nprofileUnload() {
+_nprofileUnloadProfile() {
     local profile="$1"
-    _nLogOrEcho "Unloading profile $profile ..."
+    echo "Unloading profile $profile ..."
     _nprofileInvokeTeardown "$profile"
     if [[ $profile != "default" ]]; then
         _nprofileInvokeTeardown "default"
     fi
     unset N_PROFILE
-    _nLogOrEcho "Profile unloading done."
+    echo "Profile unloading done."
+}
+
+_nprofileUnloadCurrentProfile() {
+    local currentProfile="$(_nprofileCurrent)"
+    if [[ "$currentProfile" == "" ]]; then
+        echo "[ERROR] No current profile loaded."
+        return 1
+    fi
+
+    _nprofileUnloadProfile "$currentProfile"
+}
+
+_nprofileReloadCurrentProfile() {
+    local currentProfile="$(_nprofileCurrent)"
+    if [[ "$currentProfile" == "" ]]; then
+        echo "[ERROR] No current profile loaded."
+        return 1
+    fi
+    _nprofileUnloadProfile "$currentProfile"
+    _nprofileLoadProfile "$currentProfile"
 }
 
 _nprofileCurrent() {
     echo "$N_PROFILE"
 }
 
-_nprofileReinit() {
+_nprofilePrintCurrentProfile() {
     local currentProfile="$(_nprofileCurrent)"
-    local newProfile="${1-$currentProfile}"
     if [[ "$currentProfile" != "" ]]; then
-        _nprofileUnload "$currentProfile"
+        echo "$currentProfile"
+    else
+        echo "No current profile loaded."
     fi
-    _nprofileLoad "$newProfile"
+}
+
+_nprofileLoadNewProfile() {
+    local currentProfile="$(_nprofileCurrent)"
+    if [[ "$currentProfile" != "" ]]; then
+        _nprofileUnloadProfile "$currentProfile"
+    fi
+
+    local newProfile="${1-$currentProfile}"
+    _nprofileLoadProfile "$newProfile"
 }
 
 _nprofileUsage() {
@@ -109,27 +148,47 @@ _nprofileUsage() {
     echo "[Options]"
     echo "    <profile>"
     echo "        Load the provided profile."
-    echo "    --current"
-    echo "        Load the provided profile."
-    echo "    -?"
+    echo "    -c"
+    echo "        Display the current profile."
+    echo "    -u"
+    echo "        Unload the current profile."
+    echo "    -r"
+    echo "        Reload the current profile."
+    echo "    -h"
     echo "        Show this message."
 }
 
 _nprofile() {
     local input="$1"
 
-    if [[ "$input" == "-?" ]]; then
+    if [[ "$input" == "-h" ]]; then
         _nprofileUsage
         return $?
     fi
 
-    if [[ "$input" == "--current" ]]; then
-        _nprofileCurrent
+    if [[ "$input" == "-c" ]]; then
+        _nprofilePrintCurrentProfile
         return $?
     fi
 
-    _nprofileReinit "$input"
-    return $?
+    if [[ "$input" == "-u" ]]; then
+        _nprofileUnloadCurrentProfile
+        return $?
+    fi
+
+    if [[ "$input" == "-r" ]]; then
+        _nprofileReloadCurrentProfile
+        return $?
+    fi
+
+    if [[ "$input" != "" ]]; then
+        _nprofileLoadNewProfile "$input"
+        return $?
+    fi
+
+    echo "[ERROR] Wrong usage!"
+    _nprofileUsage
+    return 1
 }
 
 _nprofileInit
@@ -137,5 +196,4 @@ _nprofileInit
 alias $_nprofileExportAs="_nprofile"
 
 _nLog "Use '$_nprofileExportAs <profile>' to setup/switch profile."
-_nLog "Use '$_nprofileExportAs -?' to know more about this command."
-
+_nLog "Use '$_nprofileExportAs -h' to know more about this command."

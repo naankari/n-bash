@@ -1,0 +1,68 @@
+#!/bin/bash
+
+_setup_profile_default() {
+    echo "INSIDE SETUP: DEFAULT PROFILE"
+
+    ##########################################
+    # Write your custom setup here.
+    # Below are some useful line:
+    ##########################################
+
+    # Setting some defaults
+    ##########################################
+    #alias sudo="sudo "
+    #export EDITOR=vim
+    #alias ls="ls -GFh"
+
+    # Setting color
+    ##########################################
+    #export CLICOLOR=1
+    #export LSCOLORS=ExFxBxDxCxegedabagacad
+}
+
+_setup_profile_default_bash() {
+    echo "INSIDE SETUP: DEFAULT PROFILE FOR BASH"
+
+    ##########################################
+    # Write your custom setup here.
+    # Below are some useful line:
+    ##########################################
+
+    # Setting history parameters
+    ##########################################
+    #export HISTCONTROL=ignorespace,erasedups
+    #export HISTSIZE=10000
+    #shopt -s histappend
+}
+
+_setup_profile_default_zsh() {
+    echo "INSIDE SETUP: DEFAULT PROFILE FOR ZSH"
+
+    ##########################################
+    # Write your custom setup here.
+    ##########################################
+}
+
+_teardown_profile_default() {
+    echo "INSIDE TEARDOWN: DEFAULT PROFILE"
+
+    ##########################################
+    # Write your custom setup here.
+    ##########################################
+}
+
+_teardown_profile_default() {
+    echo "INSIDE TEARDOWN: DEFAULT PROFILE FOR BASH"
+
+    ##########################################
+    # Write your custom setup here.
+    ##########################################
+}
+
+_teardown_profile_default() {
+    echo "INSIDE TEARDOWN: DEFAULT PROFILE FOR ZSH"
+
+    ##########################################
+    # Write your custom setup here.
+    ##########################################
+}

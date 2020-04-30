@@ -1,10 +1,10 @@
 #This file lists all enabled modules.
 #Comment out a module name if it should not be loaded.
 
-path
-directory-history
-prompt
-aws-env
+#path
+#directory-history
+#prompt
+#aws-env
 #sound
 #SkipThis
-profile
+#profile

@@ -67,7 +67,7 @@ _nInitInternal() {
     fi
 
     if [[ -f $_nMasterSwitchFile ]]; then
-        local switchState=$(_nReadEffectiveLine "$_nMasterSwitchFile")
+        local switchState=$(_nReadFirstEffectiveLine "$_nMasterSwitchFile")
         switchState=$(_nToLower "$switchState")
         if [[ "$switchState" == "off" ]]; then
             _nLog "Found switch file $_nMasterSwitchFile with '$switchState' state. Will not setup nBash."
@@ -101,10 +101,19 @@ _nLoadModules() {
     fi
 
     _nLog "Loading modules from file $_nModulesEnabledFile ..."
-    for module in `_nReadEffectiveLines "$_nModulesEnabledFile"`; do
-        _nLog "Loading module $module ..."
-        _nSourceIf "$N_MODULES_DIR/$module.sh"
-    done
+
+    local modulesEnabledFilePath=$(_nEvaluatePath "$_nModulesEnabledFile")
+    if [[ -f $modulesEnabledFilePath ]]; then
+        while read line
+        do
+            line=$(_nEffectiveLine "$line")
+            if [[ "$line" != "" ]]; then
+                _nLog "Loading module $line ..."
+                _nSourceIf "$N_MODULES_DIR/$line.sh"
+            fi
+        done < "$modulesEnabledFilePath"
+    fi
+
     _nLog "Finished loading modules."
 }
 

@@ -79,7 +79,7 @@ _nsoundInit() {
         fi
     fi
 
-    for availableOutputChannel in `$(_nReadEffectiveLines "$_nsoundAvailableOutputChannelsFile")`; do
+    for availableOutputChannel in `$(_nReadFirstEffectiveLines "$_nsoundAvailableOutputChannelsFile")`; do
         _nsoundAvailableOutputChannels+=("$availableOutputChannel")
     done
 

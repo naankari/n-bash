@@ -31,9 +31,18 @@ _npathInit() {
 
     export _N_PATH_ORIG="$PATH"
 
-    for aPath in `_nReadEffectivePaths "$_npathSourceFile"`; do
-        PATH="$aPath:$PATH"
-    done
+
+    local soureFilePath=$(_nEvaluatePath "$_npathSourceFile")
+    if [[ -f $soureFilePath ]]; then
+        while read line
+        do
+            line=$(_nEffectiveLine "$line")
+            if [[ "$line" != "" ]]; then
+                line=$(_nEvaluatePath "$line")
+                PATH="$line:$PATH"
+            fi
+        done < "$soureFilePath"
+    fi
 
     export PATH
 

@@ -114,26 +114,25 @@ _nFindFirstFileThatExists() {
     done
 }
 
-_nReadEffectiveLines() {
+_nReadFirstEffectiveLine() {
     local aPath=$(_nEvaluatePath "$1")
     if [[ ! -f $aPath ]]; then
         echo ""
         return
     fi
-    local lines=$(cat "$aPath" | sed -e 's/^\s*//;s/\s*$//' | grep -iv "^[ \t]*$" | grep -iv "^[ \t]*#.*$")
-    echo $lines
+    while read line
+    do
+        line=$(_nEffectiveLine "$line")
+        if [[ "$line" != "" ]]; then
+            echo $line
+            return
+        fi
+    done < "$aPath"
 }
 
-_nReadEffectiveLine() {
-    local lines=$(_nReadEffectiveLines "$1")
-    lines=$(echo "$lines" | head -1)
-    echo "$lines"
-}
-
-_nReadEffectivePaths() {
-    for line in `_nReadEffectiveLines "$1"`; do
-        _nEvaluatePath "$line"
-    done
+_nEffectiveLine() {
+    local line=$(echo "$1" | sed -e 's/^\s*//;s/\s*$//' | grep -iv "^[ \t]*$" | grep -iv "^[ \t]*#.*$")
+    echo $line
 }
 
 _nToUpper() {

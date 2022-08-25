@@ -51,7 +51,7 @@ _teardown_profile_default() {
     ##########################################
 }
 
-_teardown_profile_default() {
+_teardown_profile_default_bash() {
     echo "INSIDE TEARDOWN: DEFAULT PROFILE FOR BASH"
 
     ##########################################
@@ -59,7 +59,7 @@ _teardown_profile_default() {
     ##########################################
 }
 
-_teardown_profile_default() {
+_teardown_profile_default_zsh() {
     echo "INSIDE TEARDOWN: DEFAULT PROFILE FOR ZSH"
 
     ##########################################

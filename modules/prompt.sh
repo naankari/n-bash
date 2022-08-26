@@ -49,7 +49,7 @@ _npromptCurrentUserForPrompt() {
 
 _npromptCurrentHostForPrompt() {
     if [[ -f $_npromptHostnameFile ]]; then
-        _nReadEffectiveLine "$_npromptHostnameFile"
+        _nReadFirstEffectiveLine "$_npromptHostnameFile"
         return;
     fi
     if [[ "$N_CURRENT_SHELL" == "bash" ]]; then
